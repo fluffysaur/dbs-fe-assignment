@@ -58,7 +58,8 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  min-height: 64px;
+  /* Fixed so skeleton rows match loaded rows. */
+  min-height: 70px;
   padding: var(--space-3) 0;
   border-top: 1px solid var(--border);
 }

@@ -25,12 +25,15 @@
 /* Main column + 300px right rail on desktop. */
 .layout {
   display: grid;
+  /* minmax(0, …): long transaction names truncate instead of widening the page. */
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-6);
   align-items: start;
 }
 
 .main {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--space-6);
   min-width: 0;
 }
