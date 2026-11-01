@@ -1,4 +1,4 @@
-import { Search } from 'lucide-react'
+import { Receipt, Search, SearchX } from 'lucide-react'
 import { useRef, useState } from 'react'
 import type { Transaction } from '../../api/types'
 import { Button } from '../../components/Button'
@@ -73,9 +73,10 @@ export function TransactionList({ transactions }: Props) {
       </div>
 
       {transactions.length === 0 ? (
-        <EmptyState message="No transactions yet." />
+        <EmptyState icon={Receipt} message="No transactions yet." />
       ) : visible.length === 0 ? (
         <EmptyState
+          icon={SearchX}
           message="No transactions match your search."
           action={
             <Button variant="secondary" onClick={clearSearch}>
