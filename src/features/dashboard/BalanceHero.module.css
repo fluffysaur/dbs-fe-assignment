@@ -1,0 +1,56 @@
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 168px;
+  padding: var(--space-6);
+  border-radius: var(--radius-xl);
+  background: linear-gradient(135deg, var(--hero-from), var(--hero-to));
+  color: var(--on-hero);
+  box-shadow: var(--shadow-md);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.total {
+  margin: var(--space-2) 0 var(--space-1);
+  font-size: var(--text-display);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+.caption {
+  font-size: var(--text-sm);
+}
+
+/* Phones: fixed to the bottom of the screen, above the safe area (D8). */
+.cta {
+  position: fixed;
+  right: var(--gutter-mobile);
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  left: var(--gutter-mobile);
+  z-index: var(--z-header);
+  box-shadow: var(--shadow-lg);
+}
+
+@media (min-width: 640px) {
+  .cta {
+    position: static;
+    box-shadow: none;
+    background: var(--on-hero);
+    color: var(--hero-from);
+  }
+
+  .cta:hover:not(:disabled) {
+    background: var(--on-hero);
+    color: var(--hero-to);
+  }
+}
