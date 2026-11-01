@@ -84,7 +84,9 @@ describe('transfer', () => {
     expect(await within(dialog).findByRole('alert')).toHaveTextContent(
       "Something went wrong. Your money hasn't left your account. Try again.",
     )
-    expect(within(dialog).getByRole('heading', { name: 'Check the details' })).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole('heading', { name: 'Check the details' }),
+    ).toBeInTheDocument()
     expect(within(dialog).getByText('Lunch #fail')).toBeInTheDocument()
     expect(within(dialog).getByRole('button', { name: 'Confirm transfer' })).toBeEnabled()
     expect(within(dialog).queryByText('Transfer sent')).not.toBeInTheDocument()

@@ -67,7 +67,7 @@ interface Db {
 
 type JsonObject = Record<string, unknown>
 
-const clone = <T,>(value: T): T => JSON.parse(JSON.stringify(value)) as T
+const clone = <T>(value: T): T => JSON.parse(JSON.stringify(value)) as T
 const SEED = seed as unknown as Db
 
 let db: Db = clone(SEED)
@@ -126,9 +126,7 @@ function jsonError(
 
 async function wait(request: Request) {
   const raw = Number(new URL(request.url).searchParams.get('delay') ?? 500)
-  const ms = Number.isFinite(raw)
-    ? Math.min(5000, Math.max(0, Math.trunc(raw)))
-    : 500
+  const ms = Number.isFinite(raw) ? Math.min(5000, Math.max(0, Math.trunc(raw))) : 500
   await delay(ms)
 }
 
@@ -236,8 +234,7 @@ export const handlers = [
     }
 
     const fields: Record<string, string> = {}
-    const fromAccountId =
-      typeof body.fromAccountId === 'string' ? body.fromAccountId : ''
+    const fromAccountId = typeof body.fromAccountId === 'string' ? body.fromAccountId : ''
     const from = db.accounts.find((account) => account.id === fromAccountId)
 
     if (!fromAccountId) {
@@ -277,8 +274,7 @@ export const handlers = [
     let recipient: { name: string; bank: string; accountNumber: string } | null = null
 
     if (hasPayee === hasRecipient) {
-      fields.payeeId =
-        'Provide either a saved payee or new recipient details, not both.'
+      fields.payeeId = 'Provide either a saved payee or new recipient details, not both.'
     } else if (hasPayee) {
       const payee = db.payees.find((item) => item.id === body.payeeId)
       if (!payee) {
@@ -331,12 +327,17 @@ export const handlers = [
     const limit = db.customer.dailyTransferLimit
     const remaining = round2(limit - db.customer.transferredToday)
     if (amount > remaining) {
-      return jsonError(422, 'DAILY_LIMIT_EXCEEDED', 'Amount exceeds remaining daily limit.', {
-        fields: {
-          amount: `This transfer exceeds your remaining daily limit (${formatMoney(remaining)}).`,
+      return jsonError(
+        422,
+        'DAILY_LIMIT_EXCEEDED',
+        'Amount exceeds remaining daily limit.',
+        {
+          fields: {
+            amount: `This transfer exceeds your remaining daily limit (${formatMoney(remaining)}).`,
+          },
+          meta: { limit, used: db.customer.transferredToday, remaining },
         },
-        meta: { limit, used: db.customer.transferredToday, remaining },
-      })
+      )
     }
 
     if (note !== null && note.includes('#fail')) {
@@ -349,9 +350,7 @@ export const handlers = [
 
     const transferAmount = round2(amount)
     from.balance = round2(from.balance - transferAmount)
-    db.customer.transferredToday = round2(
-      db.customer.transferredToday + transferAmount,
-    )
+    db.customer.transferredToday = round2(db.customer.transferredToday + transferAmount)
 
     const createdAt = new Date().toISOString()
     const transfer = {

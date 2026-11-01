@@ -35,10 +35,7 @@ export function Dashboard({ preferences }: Props) {
 
       {dashboard.status === 'pending' && <DashboardSkeleton />}
       {dashboard.status === 'error' && (
-        <DashboardError
-          onRetry={dashboard.retry}
-          isRetrying={dashboard.isRetrying}
-        />
+        <DashboardError onRetry={dashboard.retry} isRetrying={dashboard.isRetrying} />
       )}
       {dashboard.status === 'success' && (
         <DashboardContent

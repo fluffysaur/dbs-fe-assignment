@@ -4,11 +4,11 @@
 site already use these handlers through MSW. The full contract is in
 [`../brief/api-contract.md`](../brief/api-contract.md).
 
-| File | What it is |
-| --- | --- |
-| `handlers.ts` | MSW handlers (used in the browser and in Vitest) |
-| `db.json` | Seed data |
-| `server.mjs` | Optional Node server with the same behaviour, for `curl` debugging |
+| File          | What it is                                                         |
+| ------------- | ------------------------------------------------------------------ |
+| `handlers.ts` | MSW handlers (used in the browser and in Vitest)                   |
+| `db.json`     | Seed data                                                          |
+| `server.mjs`  | Optional Node server with the same behaviour, for `curl` debugging |
 
 Don't edit these to make your UI or tests pass. Override a response inside a
 test instead (see the contract).

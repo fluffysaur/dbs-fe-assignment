@@ -193,8 +193,7 @@ const server = createServer(async (req, res) => {
         fields.fromAccountId = 'Transfers can only be made from a deposit account.'
       }
 
-      const amount =
-        typeof body.amount === 'string' ? Number(body.amount) : body.amount
+      const amount = typeof body.amount === 'string' ? Number(body.amount) : body.amount
       if (typeof amount !== 'number' || !Number.isFinite(amount)) {
         fields.amount = 'Enter an amount.'
       } else if (amount < 1) {
@@ -212,8 +211,7 @@ const server = createServer(async (req, res) => {
       }
 
       const hasPayee = typeof body.payeeId === 'string' && body.payeeId.length > 0
-      const hasRecipient =
-        typeof body.recipient === 'object' && body.recipient !== null
+      const hasRecipient = typeof body.recipient === 'object' && body.recipient !== null
 
       let recipient = null
       if (hasPayee === hasRecipient) {
@@ -250,9 +248,15 @@ const server = createServer(async (req, res) => {
       }
 
       if (Object.keys(fields).length > 0) {
-        return fail(res, 400, 'VALIDATION_ERROR', 'Please check the highlighted fields.', {
-          fields,
-        })
+        return fail(
+          res,
+          400,
+          'VALIDATION_ERROR',
+          'Please check the highlighted fields.',
+          {
+            fields,
+          },
+        )
       }
 
       if (amount > from.balance) {
@@ -296,9 +300,7 @@ const server = createServer(async (req, res) => {
 
       const transferAmount = round2(amount)
       from.balance = round2(from.balance - transferAmount)
-      db.customer.transferredToday = round2(
-        db.customer.transferredToday + transferAmount,
-      )
+      db.customer.transferredToday = round2(db.customer.transferredToday + transferAmount)
 
       const createdAt = new Date().toISOString()
       const transfer = {
@@ -360,12 +362,16 @@ const server = createServer(async (req, res) => {
     }
   } finally {
     if (process.env.LOG_REQUESTS === '1') {
-      console.log(`[mock-api] ${method} ${path} ${res.statusCode} ${Date.now() - started}ms`)
+      console.log(
+        `[mock-api] ${method} ${path} ${res.statusCode} ${Date.now() - started}ms`,
+      )
     }
   }
 })
 
 server.listen(PORT, () => {
   console.log(`[mock-api] listening on http://localhost:${PORT}`)
-  console.log('[mock-api] hooks: ?scenario=error | ?scenario=empty | ?delay=1500 | note "#fail" | POST /api/__reset')
+  console.log(
+    '[mock-api] hooks: ?scenario=error | ?scenario=empty | ?delay=1500 | note "#fail" | POST /api/__reset',
+  )
 })

@@ -1,9 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import {
-  accountsQuery,
-  customerQuery,
-  recentTransactionsQuery,
-} from '../../api/queries'
+import { accountsQuery, customerQuery, recentTransactionsQuery } from '../../api/queries'
 
 /**
  * The dashboard's three requests, fired in parallel (D1), combined into one

@@ -2,7 +2,7 @@
 
 - Deployed: [dbs-fe-assignment-tanyijia.vercel.app](https://dbs-fe-assignment-tanyijia.vercel.app/)
 - Run locally: `npm install && npm run dev`
-- Checks: `npm run check` (lint + typecheck + tests) and `npm run build`. Both also run in GitHub Actions (`.github/workflows/ci.yml`).
+- Checks: `npm run check` (lint + format + typecheck + tests) and `npm run build`. Both also run in GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Project structure
 
@@ -159,13 +159,13 @@ Test notes:
   wireframe, tokens and starter code, then asked me the design decisions in rounds, each with options,
   trade-offs and a recommendation. I made the calls; most matched its recommendations. Where I
   departed or pushed back:
-    - I added the optional **`Discard this transfer?` confirmation**, which it had suggested skipping to
-      keep scope small, because losing a half-filled transfer to a stray Esc or ✕ is a real usability problem.
-    - I stopped a round to ask for more detail on **search (local vs `?q=`)**, **post-transfer refresh**
-      (invalidate vs cache write) and **form structure** before deciding. In each case I chose the simpler
-      option I could explain: local filter, invalidate, one form with one schema.
-    - The result was a written plan (decisions, file layout, build order, test list) that I approved
-      before any code was written.
+  - I added the optional **`Discard this transfer?` confirmation**, which it had suggested skipping to
+    keep scope small, because losing a half-filled transfer to a stray Esc or ✕ is a real usability problem.
+  - I stopped a round to ask for more detail on **search (local vs `?q=`)**, **post-transfer refresh**
+    (invalidate vs cache write) and **form structure** before deciding. In each case I chose the simpler
+    option I could explain: local filter, invalidate, one form with one schema.
+  - The result was a written plan (decisions, file layout, build order, test list) that I approved
+    before any code was written.
 - **Implementation.** Claude wrote the code, tests, CI workflow and a first draft of this README,
   following that plan, one commit per slice. It checked its own work with `npm run check` and
   `npm run build`, and drove the running app in headless Chrome (screenshots, focus checks, console

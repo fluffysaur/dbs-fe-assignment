@@ -85,9 +85,7 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
             <dl id="amount-help" className={styles.limits}>
               <div>
                 <dt>Available</dt>
-                <dd className="amount">
-                  {account ? formatMoney(account.balance) : '—'}
-                </dd>
+                <dd className="amount">{account ? formatMoney(account.balance) : '—'}</dd>
               </div>
               <div>
                 <dt>Remaining daily limit</dt>

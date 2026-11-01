@@ -1,3 +1,7 @@
+## Formatting
+
+Run `npm run format` before committing. CI fails on unformatted code (`npm run format:check`).
+
 ## Agent skills
 
 ### Issue tracker
