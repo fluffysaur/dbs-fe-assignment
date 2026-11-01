@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App'
+import { hasDemoScenario } from './lib/demoParams'
 import './index.css'
 
 async function enableMocking() {
@@ -35,7 +36,9 @@ async function bootstrap() {
 
   const queryClient = new QueryClient({
     defaultOptions: {
-      queries: { staleTime: 30_000, retry: 1 },
+      // With a demo `?scenario=` in the URL, don't auto-retry, so the error
+      // state stays visible until the user presses Retry.
+      queries: { staleTime: 30_000, retry: hasDemoScenario() ? false : 1 },
     },
   })
 
