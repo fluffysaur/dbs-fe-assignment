@@ -25,7 +25,7 @@ export function RecipientStep() {
   // No saved payees: preselect "Send to someone new" (as the default, so the
   // form doesn't count as changed).
   useEffect(() => {
-    if (payees.data?.length === 0 && getValues('payeeId') === '') {
+    if (payees.data?.length === 0 && !getValues('payeeId')) {
       resetField('payeeId', { defaultValue: NEW_RECIPIENT })
     }
   }, [payees.data, getValues, resetField])
@@ -58,6 +58,8 @@ export function RecipientStep() {
           />
         </div>
       )}
+
+      <InlineError id="payeeId-error" message={payeeError} />
 
       <fieldset
         className={styles.payees}
@@ -113,7 +115,6 @@ export function RecipientStep() {
           <span className={styles.payeeName}>Send to someone new</span>
         </label>
       </fieldset>
-      <InlineError id="payeeId-error" message={payeeError} />
 
       {payeeId === NEW_RECIPIENT && (
         <div className={styles.fields}>

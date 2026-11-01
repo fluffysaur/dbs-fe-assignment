@@ -40,8 +40,8 @@ interface SchemaContext {
 export function makeTransferSchema({ accounts, remainingLimit }: SchemaContext) {
   return z
     .object({
-      /** A saved payee's id, or NEW_RECIPIENT. */
-      payeeId: z.string(),
+      /** A saved payee's id, or NEW_RECIPIENT. null: React Hook Form's value for an unchecked radio group. */
+      payeeId: z.string().nullable(),
       recipient: z.object({
         name: z.string(),
         accountNumber: z.string(),
@@ -66,10 +66,10 @@ export function makeTransferSchema({ accounts, remainingLimit }: SchemaContext) 
         .max(NOTE_MAX_LENGTH, 'Keep the note to 50 characters or fewer.'),
     })
     // Rules that depend on more than one field. Zod 4 still runs these when
-    // another field has failed (our fields are always strings), so e.g. a
+    // another field has failed (no field is ever undefined), so e.g. a
     // recipient error shows even while the amount is still empty.
     .superRefine((values, ctx) => {
-      if (values.payeeId === '') {
+      if (!values.payeeId) {
         ctx.addIssue({
           code: 'custom',
           path: ['payeeId'],

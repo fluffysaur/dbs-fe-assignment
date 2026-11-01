@@ -22,5 +22,6 @@ export function toTransferRequest(values: TransferFormValues): CreateTransferReq
       },
     }
   }
-  return { ...base, payeeId: values.payeeId }
+  // The schema has already rejected an empty or null payeeId.
+  return { ...base, payeeId: values.payeeId ?? '' }
 }

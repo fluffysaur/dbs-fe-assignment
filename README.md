@@ -191,6 +191,15 @@ mostly by the tests and the browser checks, not by the first draft being right:
 - **An incorrect README claim.** The first draft said `?scenario=error` shows the payee error state in
   the dialog. It doesn't: only the background prefetch fails, and the dialog refetches when it opens.
   The claim was corrected.
+- **Wrong error on the recipient step.** Pressing `Continue` with nobody selected first showed
+  `Choose who to send to.`, then switched to Zod's `Invalid input: expected string, received null`.
+  `Continue` focuses the first radio; when it loses focus, React Hook Form re-checks the field, and a radio
+  group with nothing checked reads as `null`, not `''`. The schema had `payeeId` as `z.string()`, so it
+  rejected the `null` with Zod's default message. Fixed by allowing `null` in the schema and treating it
+  the same as `''` (a regression test covers it). I found this by trying the flow in the browser; the
+  tests never produced a `null` because they set values directly.
+- **Payee error out of sight.** The same error sat below the payee list, so with many payees it was off
+  screen after `Continue`. Moved above the list. It is still linked to the list with `aria-describedby`.
 
 **My own fixes and changes after the AI build:**
 
