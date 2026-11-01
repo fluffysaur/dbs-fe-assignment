@@ -2,7 +2,7 @@
 
 - Deployed: [dbs-fe-assignment-tanyijia.vercel.app](https://dbs-fe-assignment-tanyijia.vercel.app/)
 - Run locally: `npm install && npm run dev`
-- Checks: `npm run check` (lint + typecheck + tests) and `npm run build`. Both also run in GitHub Actions (`.github/workflows/ci.yml`).
+- Checks: `npm run check` (lint + format + typecheck + tests) and `npm run build`. Both also run in GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Project structure
 
