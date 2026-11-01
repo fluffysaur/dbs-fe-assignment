@@ -1,0 +1,14 @@
+.toggle {
+  display: inline-grid;
+  place-items: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.toggle:hover {
+  background: var(--surface-muted);
+}
