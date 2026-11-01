@@ -23,7 +23,7 @@ export function DashboardContent({ customer, accounts, transactions }: Props) {
   const newTransferButton = useRef<HTMLButtonElement>(null)
 
   return (
-    <div className={styles.layout}>
+    <div className={`${styles.layout} ${styles.fadeIn}`}>
       <div className={styles.main}>
         <BalanceHero
           accounts={accounts}

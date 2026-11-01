@@ -1,0 +1,22 @@
+.spot {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  border-radius: var(--radius-full);
+}
+
+/* Each tone is a soft background + its matching text colour from the tokens. */
+.muted {
+  background: var(--surface-muted);
+  color: var(--text-muted);
+}
+
+.negative {
+  background: var(--negative-soft);
+  color: var(--negative);
+}
+
+.positive {
+  background: var(--positive-soft);
+  color: var(--positive);
+}

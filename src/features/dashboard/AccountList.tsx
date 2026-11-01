@@ -1,3 +1,4 @@
+import { Wallet } from 'lucide-react'
 import type { Account } from '../../api/types'
 import { EmptyState } from '../../components/EmptyState'
 import { formatMoney } from '../../lib/format'
@@ -16,7 +17,7 @@ export function AccountList({ accounts }: Props) {
       </h2>
       {accounts.length === 0 ? (
         <div className={dashboard.section}>
-          <EmptyState message="No accounts to show." />
+          <EmptyState icon={Wallet} message="No accounts to show." />
         </div>
       ) : (
         <ul className={styles.list}>

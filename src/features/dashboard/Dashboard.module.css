@@ -38,6 +38,17 @@
   min-width: 0;
 }
 
+/* The loaded dashboard fades in over the skeleton's exact layout. */
+.fadeIn {
+  animation: fade-in var(--duration-base) var(--ease-out);
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
 /* Shared section card. */
 .section {
   padding: var(--space-5);

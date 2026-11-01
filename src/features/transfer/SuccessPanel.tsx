@@ -2,6 +2,7 @@ import { Check } from 'lucide-react'
 import type { Ref } from 'react'
 import type { Transfer } from '../../api/types'
 import { Button } from '../../components/Button'
+import { SpotIcon } from '../../components/SpotIcon'
 import { formatMoney } from '../../lib/format'
 import styles from './TransferDialog.module.css'
 
@@ -16,9 +17,7 @@ export function SuccessPanel({ transfer, headingRef, onDone }: Props) {
   const { recipient } = transfer
   return (
     <div className={styles.success}>
-      <span className={styles.successIcon} aria-hidden>
-        <Check size={32} />
-      </span>
+      <SpotIcon icon={Check} tone="positive" size={64} className={styles.successIcon} />
       <h3 ref={headingRef} tabIndex={-1} className={styles.stepTitle}>
         Transfer sent
       </h3>

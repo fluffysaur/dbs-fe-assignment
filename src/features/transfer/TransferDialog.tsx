@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { ArrowLeft, X } from 'lucide-react'
+import { ArrowLeft, LoaderCircle, X } from 'lucide-react'
 import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
 import { type FieldPath, FormProvider, useForm } from 'react-hook-form'
 import { ApiError } from '../../api/client'
@@ -192,7 +192,8 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
       ) : step !== 'success' ? (
         <FormProvider {...form}>
           <form className={styles.form} noValidate onSubmit={handleSubmit}>
-            <div className={styles.body}>
+            {/* Keyed by step so each step plays the entry animation. */}
+            <div key={step} className={styles.body}>
               <Stepper current={step} />
               <h3 ref={headingRef} tabIndex={-1} className={styles.stepTitle}>
                 {STEP_TITLES[step]}
@@ -226,11 +227,16 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
                 </Button>
               )}
               <Button type="submit" disabled={isSending}>
-                {step !== 'review'
-                  ? 'Continue'
-                  : isSending
-                    ? 'Sending…'
-                    : 'Confirm transfer'}
+                {step !== 'review' ? (
+                  'Continue'
+                ) : isSending ? (
+                  <>
+                    <LoaderCircle aria-hidden size={18} className={styles.spinner} />
+                    Sending…
+                  </>
+                ) : (
+                  'Confirm transfer'
+                )}
               </Button>
             </div>
           </form>
