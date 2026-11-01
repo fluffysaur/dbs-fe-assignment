@@ -59,6 +59,8 @@ describe('transfer schema', () => {
 
   it('requires a payee or a valid new recipient', () => {
     expect(errorFor({ payeeId: '' }, 'payeeId')).toBe('Choose who to send to.')
+    // What React Hook Form reads from a radio group with nothing checked.
+    expect(errorFor({ payeeId: null }, 'payeeId')).toBe('Choose who to send to.')
 
     const recipient = { name: 'Alex Lim', accountNumber: '1234567', bank: '' }
     expect(errorFor({ payeeId: NEW_RECIPIENT, recipient }, 'recipient.accountNumber')).toBe(
