@@ -1,0 +1,77 @@
+.page {
+  max-width: var(--container);
+  margin: 0 auto;
+  /* Leave room for the fixed "New transfer" button on phones. */
+  padding: var(--space-6) var(--gutter-mobile)
+    calc(var(--tap-target) + var(--space-10) + env(safe-area-inset-bottom));
+}
+
+.greeting {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-height: 2.5rem;
+  margin-bottom: var(--space-6);
+}
+
+.greeting h1 {
+  font-size: var(--text-2xl);
+  letter-spacing: var(--tracking-tight);
+  line-height: var(--leading-tight);
+}
+
+/* Main column + 300px right rail on desktop. */
+.layout {
+  display: grid;
+  /* minmax(0, …): long transaction names truncate instead of widening the page. */
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  align-items: start;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+/* Shared section card. */
+.section {
+  padding: var(--space-5);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.sectionTitle {
+  margin-bottom: var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@media (min-width: 640px) {
+  .page {
+    padding: var(--space-8) var(--gutter);
+  }
+
+  .mobileSegment {
+    display: none;
+  }
+
+  .section {
+    padding: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+}

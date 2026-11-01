@@ -4,7 +4,31 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#f4f6fa" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>Meridian Banking</title>
+    <script>
+      // Apply the saved (or system) theme and saved segment before first
+      // paint, so a reload never flashes the wrong colours. Keep the keys in
+      // sync with src/features/theme/usePreferences.ts.
+      ;(function () {
+        var root = document.documentElement
+        try {
+          var theme = localStorage.getItem('meridian-theme')
+          if (theme !== 'light' && theme !== 'dark') {
+            theme = window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light'
+          }
+          root.dataset.theme = theme
+          var segment = localStorage.getItem('meridian-segment')
+          if (segment === 'retail' || segment === 'premium') {
+            root.dataset.segment = segment
+          }
+        } catch (e) {
+          // Storage blocked: keep the defaults on <html>.
+        }
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>
