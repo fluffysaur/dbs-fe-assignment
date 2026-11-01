@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom/vitest'
-import { configure } from '@testing-library/react'
+import { cleanup, configure } from '@testing-library/react'
 import { setupServer } from 'msw/node'
 import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
 import { handlers, resetMockDb } from '../mocks/handlers'
@@ -27,5 +27,9 @@ beforeEach(() => {
   delete document.documentElement.dataset.theme
   delete document.documentElement.dataset.segment
 })
-afterEach(() => server.resetHandlers())
+afterEach(() => {
+  // Vitest globals are off, so Testing Library can't clean up by itself.
+  cleanup()
+  server.resetHandlers()
+})
 afterAll(() => server.close())
