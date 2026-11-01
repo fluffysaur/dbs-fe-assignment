@@ -1,0 +1,353 @@
+/* Phones and tablets: a full-screen sheet. */
+.dialog {
+  width: 100%;
+  max-width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.dialog[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.dialog::backdrop {
+  background: var(--overlay);
+}
+
+/* Desktop: a centred 520px dialog (T1). */
+@media (min-width: 1024px) {
+  .dialog {
+    max-width: 520px;
+    /* Not `auto`: a modal dialog is pinned top and bottom, so auto stretches. */
+    height: fit-content;
+    max-height: calc(100dvh - var(--space-16));
+    margin: auto;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+  }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-3) var(--space-3) var(--space-6);
+  border-bottom: 1px solid var(--border);
+}
+
+.title {
+  font-size: var(--text-lg);
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: var(--tap-target);
+  height: var(--tap-target);
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+}
+
+.close:hover:not(:disabled) {
+  background: var(--surface-muted);
+}
+
+.form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.body {
+  display: grid;
+  flex: 1;
+  align-content: start;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-6);
+  overflow-y: auto;
+}
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-6)
+    calc(var(--space-4) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.stepTitle {
+  font-size: var(--text-xl);
+  letter-spacing: var(--tracking-tight);
+}
+
+/* Stepper: Recipient → Amount → Review */
+.stepper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  list-style: none;
+}
+
+.stepper li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stepper li + li::before {
+  content: '→' / '';
+  color: var(--text-muted);
+}
+
+.stepper li[aria-current='step'] {
+  color: var(--text);
+  font-weight: var(--weight-semibold);
+}
+
+.stepNumber {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+}
+
+.stepper li[aria-current='step'] .stepNumber,
+.stepper li[data-done] .stepNumber {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: var(--on-brand);
+}
+
+/* Recipient step */
+.payees {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.payee {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 60px;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.payee:hover {
+  background: var(--surface-muted);
+}
+
+.payee:has(input:checked) {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+
+.payee input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--brand);
+}
+
+.initials {
+  display: grid;
+  flex-shrink: 0;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--surface-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+}
+
+.payeeText {
+  display: grid;
+}
+
+.payeeName {
+  font-weight: var(--weight-medium);
+}
+
+.payeeMeta,
+.hint {
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.hint[data-over] {
+  color: var(--negative);
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-muted);
+}
+
+.fields {
+  display: grid;
+  gap: var(--space-4);
+}
+
+/* Amount step */
+.amountInput {
+  position: relative;
+}
+
+.amountInput span {
+  position: absolute;
+  top: 50%;
+  left: var(--space-3);
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-weight: var(--weight-semibold);
+  pointer-events: none;
+}
+
+.amountInput input {
+  padding-left: 3.25rem;
+  font-size: var(--text-lg);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.chip {
+  min-width: 64px;
+  min-height: var(--tap-target);
+  padding: 0 var(--space-4);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--weight-medium);
+}
+
+.chip:hover {
+  background: var(--brand-soft);
+}
+
+.limits {
+  display: grid;
+  gap: var(--space-1);
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+}
+
+.limits div,
+.summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.limits dt,
+.summary dt {
+  color: var(--text-muted);
+}
+
+.limits dd,
+.summary dd {
+  margin: 0;
+  text-align: right;
+}
+
+/* Review step */
+.summary {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+
+.total {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+  font-weight: var(--weight-semibold);
+}
+
+.alert {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--negative);
+  border-radius: var(--radius-md);
+  background: var(--negative-soft);
+  color: var(--text);
+}
+
+/* Success and discard panels */
+.success,
+.discard {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  padding: var(--space-10) var(--space-6);
+  text-align: center;
+}
+
+.successIcon {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-full);
+  background: var(--positive-soft);
+  color: var(--positive);
+}
+
+.successAmount {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.reference {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+.reference dt {
+  color: var(--text-muted);
+}
+
+.reference dd {
+  margin: 0;
+  font-weight: var(--weight-semibold);
+}
+
+.discardActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}

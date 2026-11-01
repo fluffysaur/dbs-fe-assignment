@@ -2,6 +2,7 @@ import { usePrefetchQuery } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { payeesQuery } from '../../api/queries'
 import type { Account, Customer, Transaction } from '../../api/types'
+import { TransferDialog } from '../transfer/TransferDialog'
 import { AccountList } from './AccountList'
 import { BalanceHero } from './BalanceHero'
 import { DailyLimitCard } from './DailyLimitCard'
@@ -35,7 +36,17 @@ export function DashboardContent({ customer, accounts, transactions }: Props) {
       <aside aria-label="Daily limit">
         <DailyLimitCard customer={customer} />
       </aside>
-      {isTransferOpen && null}
+      {isTransferOpen && (
+        <TransferDialog
+          accounts={accounts}
+          customer={customer}
+          onClose={() => {
+            setTransferOpen(false)
+            // Focus goes back to the button that opened the dialog (T1).
+            newTransferButton.current?.focus()
+          }}
+        />
+      )}
     </div>
   )
 }
