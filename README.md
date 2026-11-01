@@ -94,6 +94,14 @@ step change, focus moves to the step heading so screen readers announce it. On c
 row). Below 640px, `New transfer` is fixed at the bottom above the safe area, and the segment switch moves
 under the greeting. Every tap target is ≥ 44px. Verified no sideways scroll at 360px and 390px.
 
+**Motion and illustrations.** A deliberate, small layer of polish to make the app feel finished without
+much extra code. Empty, error and success screens get a lucide icon in a tinted circle (`SpotIcon`, one
+token pair per tone). The dialog, each step and the loaded dashboard fade in, the success circle pops in,
+and `Sending…` gets a spinner. All CSS, existing motion tokens only, `opacity`/`transform` only, each plays
+once, and the reduced-motion rule turns them off. Left out on purpose: a balance count-up (noisy for screen
+readers), a separate sending screen (T5/T7 keep the user on review with the `Sending…` button) and dimming
+the review while sending (lower text contrast would break TH3).
+
 **Libraries added.** `lucide-react` for icons only. Everything else is in the starter. Native elements
 (dialog, radios, select) rather than a component library, since they're accessible by default and
 there's less to explain.
@@ -186,7 +194,9 @@ mostly by the tests and the browser checks, not by the first draft being right:
 
 **My own fixes and changes after the AI build:**
 
-- _(Adding these as I go.)_
+- **Motion and illustrations** (see Decisions). My idea, scoped down against the brief before
+  building: I dropped a separate "sending" screen, a self-drawing tick and dimming the review step.
+  The payee list's `No saved payees yet.` stays plain text because it sits inside the form.
 
 ## Not done / known issues
 
