@@ -1,12 +1,12 @@
 # Meridian Banking — Tan Yi Jia
 
-- Deployed: _TODO: add the Vercel URL_
+- Deployed: [dbs-fe-assignment-tanyijia.vercel.app](https://dbs-fe-assignment-tanyijia.vercel.app/)
 - Run locally: `npm install && npm run dev`
 - Checks: `npm run check` (lint + typecheck + tests) and `npm run build`. Both also run in GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Project structure
 
-```
+```text
 src/
   api/              Typed data layer: the only code that talks to the API
     client.ts         apiFetch + ApiError (given)
@@ -39,8 +39,7 @@ on floating-point rounding. Local state covers only UI concerns: the search text
 whether the dialog is open, and the discard prompt.
 
 - **One dashboard state (D1, D7).** `useDashboardData` runs the three queries in parallel and combines
-  them into `pending | error | success`. That gives one skeleton and one `We couldn't load your
-  dashboard.` with Retry, which refetches only the failed requests. A query that fails but still has
+  them into `pending | error | success`. That gives one skeleton and one `We couldn't load your dashboard.` with Retry, which refetches only the failed requests. A query that fails but still has
   data, such as a background refetch after a transfer, keeps showing its data instead of replacing the
   page with the error.
 - **Refresh after a transfer (T6): invalidate, don't patch.** On success I invalidate `customer`,
@@ -57,6 +56,7 @@ whether the dialog is open, and the discard prompt.
 keeps everything with no extra code. Every rule is defined once, in `features/transfer/schema.ts`:
 `makeTransferSchema({ accounts, remainingLimit })` builds the Zod schema from live data, so the balance
 and limit messages show real numbers. The same schema drives:
+
 - inline errors (`mode: 'onTouched'`: checked on blur, then re-checked while typing);
 - `Continue`, which calls `trigger(stepFields, { shouldFocus: true })` and focuses the first invalid field;
 - the final check before sending.
@@ -75,11 +75,13 @@ runs, and ✕/Back/Esc are blocked so a transfer can't be lost mid-flight.
 backdrop. It's rendered only while open, so every transfer starts with a fresh form. On open and on each
 step change, focus moves to the step heading so screen readers announce it. On close, focus returns to
 `New transfer`. Closing a half-filled form shows `Discard this transfer?` inside the same dialog.
+
 - Centred at 520px from 1024px; a full-screen sheet below that.
 - Gotcha: the effect calls `showModal()` and never `close()` on cleanup, because React StrictMode would
   run that cleanup and immediately close the dialog.
 
 **Theming (TH1–TH3).**
+
 - An inline script in `index.html` sets `data-theme` (saved choice, else the system setting) and the
   saved `data-segment` before first paint, so a reload never flashes the wrong theme.
 - `usePreferences` takes over from there.
@@ -104,15 +106,15 @@ history view.
 
 On the deployed site, add these to the page URL. `lib/demoParams.ts` forwards them to the mock API:
 
-| State | URL | What you see |
-| --- | --- | --- |
-| Loading | `?delay=3000` | Skeleton matching the final layout (no jump), then data. Also makes `Sending…` visible. |
-| Dashboard error | `?scenario=error` | `We couldn't load your dashboard.` + `Retry`. Only the **first** request per endpoint fails (and auto-retry is off while a scenario is set), so `Retry` then loads the dashboard. |
-| Empty | `?scenario=empty` | `SGD 0.00` / `No deposit accounts`, `No accounts to show.` (New transfer disabled), `No transactions yet.`, and in the dialog `No saved payees yet.` with `Send to someone new` preselected. |
-| No search results | type `zzz` in the search | `No transactions match your search.` + `Clear search` |
-| Field errors | e.g. amount `5000` from checking, or account number `123` | Message under the field; Continue focuses it |
-| Send failure | put `#fail` in the transfer note | Alert on the review step; data kept; Confirm works again |
-| Payee loading | `?delay=3000`, then open the dialog as soon as the dashboard appears | Skeleton rows in step 1 |
+| State             | URL                                                                  | What you see                                                                                                                                                                                 |
+| ----------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Loading           | `?delay=3000`                                                        | Skeleton matching the final layout (no jump), then data. Also makes `Sending…` visible.                                                                                                      |
+| Dashboard error   | `?scenario=error`                                                    | `We couldn't load your dashboard.` + `Retry`. Only the **first** request per endpoint fails (and auto-retry is off while a scenario is set), so `Retry` then loads the dashboard.            |
+| Empty             | `?scenario=empty`                                                    | `SGD 0.00` / `No deposit accounts`, `No accounts to show.` (New transfer disabled), `No transactions yet.`, and in the dialog `No saved payees yet.` with `Send to someone new` preselected. |
+| No search results | type `zzz` in the search                                             | `No transactions match your search.` + `Clear search`                                                                                                                                        |
+| Field errors      | e.g. amount `5000` from checking, or account number `123`            | Message under the field; Continue focuses it                                                                                                                                                 |
+| Send failure      | put `#fail` in the transfer note                                     | Alert on the review step; data kept; Confirm works again                                                                                                                                     |
+| Payee loading     | `?delay=3000`, then open the dialog as soon as the dashboard appears | Skeleton rows in step 1                                                                                                                                                                      |
 
 The payee error state (`We couldn't load your saved payees.` + Retry, with `Send to someone new` still
 usable) isn't reachable from the URL. The one-off `?scenario=error` hits the background prefetch, and
@@ -123,16 +125,17 @@ the dialog refetches when it opens.
 `npm test`: 17 tests. The integration tests render the whole `<App />` against the real MSW handlers
 and use `user-event`, so they check what a user sees, not component internals.
 
-| Test | Why |
-| --- | --- |
-| Amount over balance → exact error, focus on the field, **no POST sent** (MSW request log) | Required (E4.1). Shows the client rule blocks the request. |
-| Successful transfer → `Sending…` disabled, `Transfer sent` + reference → dashboard shows the new total, account balance, limit and `Transfer to Jamie Tan` row; focus back on `New transfer` | Required (E4.2). Covers T5, T6 and the cache refresh end to end. |
-| Dashboard 500 (one-off `server.use`) → error → `Retry` → loaded | Required (E4.3). |
-| Note `#fail` → alert with the brief's copy, still on review, data shown, Confirm enabled, no success | T7: "never show success after a failure". |
-| Search by category (`DINING`), no-match state, `Clear search` restores 8 rows | D6. |
+| Test                                                                                                                                                                                                      | Why                                                                                                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Amount over balance → exact error, focus on the field, **no POST sent** (MSW request log)                                                                                                                 | Required (E4.1). Shows the client rule blocks the request.                                                                         |
+| Successful transfer → `Sending…` disabled, `Transfer sent` + reference → dashboard shows the new total, account balance, limit and `Transfer to Jamie Tan` row; focus back on `New transfer`              | Required (E4.2). Covers T5, T6 and the cache refresh end to end.                                                                   |
+| Dashboard 500 (one-off `server.use`) → error → `Retry` → loaded                                                                                                                                           | Required (E4.3).                                                                                                                   |
+| Note `#fail` → alert with the brief's copy, still on review, data shown, Confirm enabled, no success                                                                                                      | T7: "never show success after a failure".                                                                                          |
+| Search by category (`DINING`), no-match state, `Clear search` restores 8 rows                                                                                                                             | D6.                                                                                                                                |
 | `schema.test.ts`: amount format, min 1.00, 2 decimals, **exact balance passes / +0.01 fails**, daily limit, note length, payee/new recipient rules, and a recipient error while the amount is still empty | Fast checks of every rule, including the cents edge case and the cross-field case (step 1 is checked while step 2 is still blank). |
 
 Test notes:
+
 - Mock responses take ~500 ms, so the async query timeout is 3 s.
 - Money assertions use `money()` (`test/renderApp.tsx`), which is `formatMoney` with the non-breaking
   space normalised the way Testing Library normalises page text.
@@ -140,17 +143,50 @@ Test notes:
 
 ## AI use
 
-_TODO (Tan Yi Jia): which tools and what for, plus two or three places where you changed, rejected or
-fixed what the AI produced, and why. Some candidates from this build to consider (only list them if you
-agree they reflect your own decisions):_
-- _Planning: the design was settled through a question-by-question review of options (search
-  strategy, refresh strategy, form structure, dialog approach) before any code was written._
-- _Testing Library didn't match `formatMoney(...)` strings (the non-breaking space is normalised in page
-  text, not in the query), which led to the `money()` helper._
-- _A layout bug: the page scrolled sideways at 360px because grid tracks sized to long transaction names;
-  fixed with `minmax(0, 1fr)`._
-- _The desktop dialog stretched to full height because `height: auto` overrides the modal dialog's
-  `fit-content`._
+**Tool:** Claude Code (Claude Opus 5.5), in the terminal, inside this repo.
+
+**How it was used:**
+
+- **Planning.** I ran Claude in plan mode with a "grill me" skill. It read the brief, API contract,
+  wireframe, tokens and starter code, then asked me the design decisions in rounds, each with options,
+  trade-offs and a recommendation. I made the calls; most matched its recommendations. Where I
+  departed or pushed back:
+    - I added the optional **`Discard this transfer?` confirmation**, which it had suggested skipping to
+      keep scope small, because losing a half-filled transfer to a stray Esc or ✕ is a real usability problem.
+    - I stopped a round to ask for more detail on **search (local vs `?q=`)**, **post-transfer refresh**
+      (invalidate vs cache write) and **form structure** before deciding. In each case I chose the simpler
+      option I could explain: local filter, invalidate, one form with one schema.
+    - The result was a written plan (decisions, file layout, build order, test list) that I approved
+      before any code was written.
+- **Implementation.** Claude wrote the code, tests, CI workflow and a first draft of this README,
+  following that plan, one commit per slice. It checked its own work with `npm run check` and
+  `npm run build`, and drove the running app in headless Chrome (screenshots, focus checks, console
+  errors, layout at 360/390px, all four theme combinations). It also computed token contrast ratios.
+- **Me.** I own the decisions above, deployed to Vercel, and read the code so I can explain and change
+  it. I'm adding my own fixes below as I find them.
+
+**Places where the AI's output was wrong and had to be fixed.** These were caught during the build,
+mostly by the tests and the browser checks, not by the first draft being right:
+
+- **Money assertions failed.** The first tests searched for `formatMoney(...)`. Testing Library turns the
+  non-breaking space after `SGD` into a normal space in page text, but not in the search string, so
+  nothing matched. Fixed with the `money()` test helper. The same tests also failed because rendered
+  output piled up between tests (Vitest globals are off, so Testing Library can't clean up by itself).
+  Fixed with an explicit `cleanup()` in `test/setup.ts`.
+- **Desktop dialog stretched to full screen height.** It used `height: auto`, which on a modal
+  `<dialog>` (pinned top and bottom) stretches instead of fitting. Changed to `height: fit-content`.
+- **Sideways scroll at 360px.** Single-column grids defaulted to `auto` tracks, which grew to fit the
+  longest (non-wrapping) transaction name. Changed to `minmax(0, 1fr)` so names truncate.
+- **Skeleton didn't match the loaded page** (rows 54px vs 70px, account cards and the limit card were
+  shorter), so the layout jumped when data arrived (D1). Measured both, then set fixed row/card
+  heights and real line heights on the placeholders.
+- **An incorrect README claim.** The first draft said `?scenario=error` shows the payee error state in
+  the dialog. It doesn't: only the background prefetch fails, and the dialog refetches when it opens.
+  The claim was corrected.
+
+**My own fixes and changes after the AI build:**
+
+- _(Adding these as I go.)_
 
 ## Not done / known issues
 
