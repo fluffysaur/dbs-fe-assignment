@@ -146,11 +146,7 @@ export function RecipientStep() {
               {...register('recipient.accountNumber')}
             />
           </Field>
-          <Field
-            id="recipient-bank"
-            label="Bank"
-            error={recipientErrors?.bank?.message}
-          >
+          <Field id="recipient-bank" label="Bank" error={recipientErrors?.bank?.message}>
             <select
               className={inputClassName}
               {...fieldProps('recipient-bank', recipientErrors?.bank?.message)}

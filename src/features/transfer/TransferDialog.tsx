@@ -36,8 +36,7 @@ const FORM_FIELDS: string[] = [...STEP_FIELDS.recipient, ...STEP_FIELDS.amount]
 const isFormField = (key: string): key is FieldPath<TransferFormValues> =>
   FORM_FIELDS.includes(key)
 
-const SEND_ERROR =
-  "Something went wrong. Your money hasn't left your account. Try again."
+const SEND_ERROR = "Something went wrong. Your money hasn't left your account. Try again."
 
 /** API validation errors carry a useful message; anything else gets the brief's copy. */
 function sendErrorMessage(error: Error) {

@@ -20,9 +20,7 @@ export function DailyLimitCard({ customer }: Props) {
         Daily limit
       </h2>
       <p>
-        <span className={`amount ${styles.remaining}`}>
-          {formatMoney(remaining)}
-        </span>{' '}
+        <span className={`amount ${styles.remaining}`}>{formatMoney(remaining)}</span>{' '}
         remaining today
       </p>
       <div

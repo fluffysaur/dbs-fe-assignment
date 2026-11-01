@@ -25,12 +25,8 @@ export function AccountList({ accounts }: Props) {
             <li key={account.id} className={`${dashboard.section} ${styles.card}`}>
               <p className={styles.name}>{account.name}</p>
               <p className={`amount ${styles.number}`}>{account.maskedNumber}</p>
-              <p className={`amount ${styles.balance}`}>
-                {formatMoney(account.balance)}
-              </p>
-              {account.type === 'credit' && (
-                <p className={styles.due}>Amount due</p>
-              )}
+              <p className={`amount ${styles.balance}`}>{formatMoney(account.balance)}</p>
+              {account.type === 'credit' && <p className={styles.due}>Amount due</p>}
             </li>
           ))}
         </ul>

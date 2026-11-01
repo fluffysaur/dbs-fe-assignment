@@ -40,9 +40,7 @@ export function usePreferences() {
   const [theme, setTheme] = useState<Theme>(() =>
     document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light',
   )
-  const [savedSegment, setSavedSegment] = useState<Segment | null>(
-    readSavedSegment,
-  )
+  const [savedSegment, setSavedSegment] = useState<Segment | null>(readSavedSegment)
   const segment: Segment = savedSegment ?? customer?.segment ?? 'retail'
 
   useEffect(() => {

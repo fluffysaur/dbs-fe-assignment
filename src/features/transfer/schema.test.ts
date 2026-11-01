@@ -4,8 +4,22 @@ import { formatMoney } from '../../lib/format'
 import { makeTransferSchema, NEW_RECIPIENT, type TransferFormValues } from './schema'
 
 const accounts: Account[] = [
-  { id: 'acc_checking', name: 'Everyday Checking', type: 'checking', maskedNumber: '•••• 4821', balance: 4280.55, currency: 'SGD' },
-  { id: 'acc_savings', name: 'Savings Plus', type: 'savings', maskedNumber: '•••• 9930', balance: 12840, currency: 'SGD' },
+  {
+    id: 'acc_checking',
+    name: 'Everyday Checking',
+    type: 'checking',
+    maskedNumber: '•••• 4821',
+    balance: 4280.55,
+    currency: 'SGD',
+  },
+  {
+    id: 'acc_savings',
+    name: 'Savings Plus',
+    type: 'savings',
+    maskedNumber: '•••• 9930',
+    balance: 12840,
+    currency: 'SGD',
+  },
 ]
 const schema = makeTransferSchema({ accounts, remainingLimit: 5000 })
 
@@ -63,9 +77,9 @@ describe('transfer schema', () => {
     expect(errorFor({ payeeId: null }, 'payeeId')).toBe('Choose who to send to.')
 
     const recipient = { name: 'Alex Lim', accountNumber: '1234567', bank: '' }
-    expect(errorFor({ payeeId: NEW_RECIPIENT, recipient }, 'recipient.accountNumber')).toBe(
-      'Enter a valid 8-digit account number.',
-    )
+    expect(
+      errorFor({ payeeId: NEW_RECIPIENT, recipient }, 'recipient.accountNumber'),
+    ).toBe('Enter a valid 8-digit account number.')
     expect(errorFor({ payeeId: NEW_RECIPIENT, recipient }, 'recipient.bank')).toBe(
       'Choose a bank.',
     )
@@ -75,7 +89,11 @@ describe('transfer schema', () => {
     // Step 1 is validated while the amount is still empty.
     expect(
       errorFor(
-        { payeeId: NEW_RECIPIENT, amount: '', recipient: { name: 'A', accountNumber: '', bank: '' } },
+        {
+          payeeId: NEW_RECIPIENT,
+          amount: '',
+          recipient: { name: 'A', accountNumber: '', bank: '' },
+        },
         'recipient.name',
       ),
     ).toBe('Enter a recipient name (2–50 characters).')

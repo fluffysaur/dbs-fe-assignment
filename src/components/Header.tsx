@@ -44,10 +44,7 @@ export function Header({ preferences }: Props) {
               onChange={preferences.changeSegment}
             />
           </div>
-          <ThemeToggle
-            theme={preferences.theme}
-            onToggle={preferences.toggleTheme}
-          />
+          <ThemeToggle theme={preferences.theme} onToggle={preferences.toggleTheme} />
           {customer ? (
             <span
               className={styles.avatar}

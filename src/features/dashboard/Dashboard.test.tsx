@@ -28,9 +28,7 @@ describe('dashboard', () => {
 
     expect(await screen.findByText(money(17120.55))).toBeInTheDocument()
     expect(screen.getByText('Across 2 deposit accounts')).toBeInTheDocument()
-    expect(
-      screen.queryByText("We couldn't load your dashboard."),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByText("We couldn't load your dashboard.")).not.toBeInTheDocument()
   })
 
   it('filters transactions by category, and clears a search with no matches', async () => {

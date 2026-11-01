@@ -15,9 +15,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={[styles.button, styles[variant], className]
-        .filter(Boolean)
-        .join(' ')}
+      className={[styles.button, styles[variant], className].filter(Boolean).join(' ')}
       {...rest}
     />
   )

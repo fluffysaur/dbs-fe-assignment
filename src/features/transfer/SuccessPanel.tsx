@@ -21,9 +21,7 @@ export function SuccessPanel({ transfer, headingRef, onDone }: Props) {
       <h3 ref={headingRef} tabIndex={-1} className={styles.stepTitle}>
         Transfer sent
       </h3>
-      <p className={`amount ${styles.successAmount}`}>
-        {formatMoney(transfer.amount)}
-      </p>
+      <p className={`amount ${styles.successAmount}`}>{formatMoney(transfer.amount)}</p>
       <p>
         to {recipient.name} · {recipient.bank} ·{' '}
         <span className="amount">{recipient.accountNumberMasked}</span>
