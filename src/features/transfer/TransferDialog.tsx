@@ -12,7 +12,7 @@ import { AmountStep } from './AmountStep'
 import { DiscardPanel } from './DiscardPanel'
 import { RecipientStep } from './RecipientStep'
 import { ReviewStep } from './ReviewStep'
-import { makeTransferSchema, type TransferFormValues } from './schema'
+import { makeTransferSchema, NEW_RECIPIENT, type TransferFormValues } from './schema'
 import { type FormStep, Stepper } from './Stepper'
 import { SuccessPanel } from './SuccessPanel'
 import { toTransferRequest } from './toTransferRequest'
@@ -36,6 +36,16 @@ const FORM_FIELDS: string[] = [...STEP_FIELDS.recipient, ...STEP_FIELDS.amount]
 const isFormField = (key: string): key is FieldPath<TransferFormValues> =>
   FORM_FIELDS.includes(key)
 
+/**
+ * Who the money goes to: a saved payee's id, or a new recipient's account.
+ * The name is left out so fixing a typo doesn't count as a new recipient.
+ */
+function recipientKey({ payeeId, recipient }: TransferFormValues) {
+  return payeeId === NEW_RECIPIENT
+    ? `${NEW_RECIPIENT}:${recipient.accountNumber.trim()}:${recipient.bank}`
+    : (payeeId ?? '')
+}
+
 const SEND_ERROR = "Something went wrong. Your money hasn't left your account. Try again."
 
 /** API validation errors carry a useful message; anything else gets the brief's copy. */
@@ -57,6 +67,8 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
   const headingRef = useRef<HTMLHeadingElement>(null)
   const [step, setStep] = useState<Step>('recipient')
   const [confirmingDiscard, setConfirmingDiscard] = useState(false)
+  // The recipient the amount step was last filled in for.
+  const amountRecipientRef = useRef<string | null>(null)
   const mutation = useCreateTransfer()
 
   const depositAccounts = useMemo(
@@ -109,7 +121,19 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
 
   async function goNext(current: 'recipient' | 'amount') {
     const valid = await form.trigger(STEP_FIELDS[current], { shouldFocus: true })
-    if (valid) setStep(current === 'recipient' ? 'amount' : 'review')
+    if (!valid) return
+    if (current === 'recipient') {
+      // A different recipient clears the amount and note so they can't go to
+      // the wrong person by mistake. The from-account isn't tied to the
+      // recipient, so it keeps the user's choice.
+      const key = recipientKey(form.getValues())
+      if (amountRecipientRef.current !== null && amountRecipientRef.current !== key) {
+        form.resetField('amount')
+        form.resetField('note')
+      }
+      amountRecipientRef.current = key
+    }
+    setStep(current === 'recipient' ? 'amount' : 'review')
   }
 
   function goBack() {

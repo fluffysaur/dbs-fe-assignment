@@ -14,6 +14,130 @@ async function startTransferToJamie(user: UserEvent) {
   return dialog
 }
 
+/** Fills the amount step: from Savings, SGD 75, note "Dinner". */
+async function fillAmountStep(user: UserEvent, dialog: HTMLElement) {
+  await user.selectOptions(
+    within(dialog).getByRole('combobox', { name: 'From account' }),
+    'acc_savings',
+  )
+  await user.type(within(dialog).getByRole('textbox', { name: 'Amount' }), '75')
+  await user.type(within(dialog).getByRole('textbox', { name: /Note/ }), 'Dinner')
+}
+
+async function goBackToRecipient(user: UserEvent, dialog: HTMLElement) {
+  await user.click(within(dialog).getByRole('button', { name: 'Back' }))
+  await within(dialog).findByRole('heading', { name: 'Who are you sending to?' })
+}
+
+async function continueToAmount(user: UserEvent, dialog: HTMLElement) {
+  await user.click(within(dialog).getByRole('button', { name: 'Continue' }))
+  await within(dialog).findByRole('heading', { name: 'How much?' })
+}
+
+function expectAmountStep(dialog: HTMLElement, amount: string, note: string) {
+  expect(within(dialog).getByRole('textbox', { name: 'Amount' })).toHaveValue(amount)
+  expect(within(dialog).getByRole('textbox', { name: /Note/ })).toHaveValue(note)
+  // The from-account always keeps the user's choice.
+  expect(within(dialog).getByRole('combobox', { name: 'From account' })).toHaveValue(
+    'acc_savings',
+  )
+}
+
+describe('changing the recipient', () => {
+  it('keeps the amount step when the recipient stays the same', async () => {
+    const { user } = renderApp()
+    const dialog = await startTransferToJamie(user)
+    await fillAmountStep(user, dialog)
+
+    await goBackToRecipient(user, dialog)
+    // Trying another payee, then going back to Jamie, still counts as the same.
+    await user.click(within(dialog).getByRole('radio', { name: /Marcus Lee/ }))
+    await user.click(within(dialog).getByRole('radio', { name: /Jamie Tan/ }))
+    await continueToAmount(user, dialog)
+
+    expectAmountStep(dialog, '75', 'Dinner')
+  })
+
+  it('clears the amount and note for a different saved payee', async () => {
+    const { user } = renderApp()
+    const dialog = await startTransferToJamie(user)
+    await fillAmountStep(user, dialog)
+
+    await goBackToRecipient(user, dialog)
+    await user.click(within(dialog).getByRole('radio', { name: /Marcus Lee/ }))
+    await continueToAmount(user, dialog)
+
+    expectAmountStep(dialog, '', '')
+  })
+
+  it('clears the amount and note after going back from review', async () => {
+    const { user } = renderApp()
+    const dialog = await startTransferToJamie(user)
+    await fillAmountStep(user, dialog)
+    await user.click(within(dialog).getByRole('button', { name: 'Continue' }))
+    await within(dialog).findByRole('heading', { name: 'Check the details' })
+
+    await user.click(within(dialog).getByRole('button', { name: 'Back' }))
+    await within(dialog).findByRole('heading', { name: 'How much?' })
+    await goBackToRecipient(user, dialog)
+    await user.click(within(dialog).getByRole('radio', { name: 'Send to someone new' }))
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Recipient name' }),
+      'Alex Ong',
+    )
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Account number (8 digits)' }),
+      '12345678',
+    )
+    await user.selectOptions(
+      within(dialog).getByRole('combobox', { name: 'Bank' }),
+      'OCBC',
+    )
+    await continueToAmount(user, dialog)
+
+    expectAmountStep(dialog, '', '')
+  })
+
+  it("treats a new recipient's name fix as the same, but a new account number as different", async () => {
+    const { user } = renderApp()
+    await user.click(await screen.findByRole('button', { name: 'New transfer' }))
+    const dialog = screen.getByRole('dialog', { name: 'New transfer' })
+    await user.click(
+      await within(dialog).findByRole('radio', { name: 'Send to someone new' }),
+    )
+    const name = within(dialog).getByRole('textbox', { name: 'Recipient name' })
+    const accountNumber = within(dialog).getByRole('textbox', {
+      name: 'Account number (8 digits)',
+    })
+    await user.type(name, 'Alx Ong')
+    await user.type(accountNumber, '12345678')
+    await user.selectOptions(
+      within(dialog).getByRole('combobox', { name: 'Bank' }),
+      'OCBC',
+    )
+    await continueToAmount(user, dialog)
+    await fillAmountStep(user, dialog)
+
+    await goBackToRecipient(user, dialog)
+    await user.clear(within(dialog).getByRole('textbox', { name: 'Recipient name' }))
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Recipient name' }),
+      'Alex Ong',
+    )
+    await continueToAmount(user, dialog)
+    expectAmountStep(dialog, '75', 'Dinner')
+
+    await goBackToRecipient(user, dialog)
+    const accountAgain = within(dialog).getByRole('textbox', {
+      name: 'Account number (8 digits)',
+    })
+    await user.clear(accountAgain)
+    await user.type(accountAgain, '87654321')
+    await continueToAmount(user, dialog)
+    expectAmountStep(dialog, '', '')
+  })
+})
+
 describe('transfer', () => {
   afterEach(() => server.events.removeAllListeners())
 
