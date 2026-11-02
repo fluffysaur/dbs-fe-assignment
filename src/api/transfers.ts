@@ -1,6 +1,7 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { type QueryClient, useMutation, useQueryClient } from '@tanstack/react-query'
 import { withDemoParams } from '../lib/demoParams'
 import { ApiError, apiFetch } from './client'
+import { accountsQuery, customerQuery, recentTransactionsQuery } from './queries'
 import type { CreateTransferRequest, TransferResponse } from './types'
 
 export function createTransfer(body: CreateTransferRequest) {
@@ -9,6 +10,12 @@ export function createTransfer(body: CreateTransferRequest) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
+}
+
+/** Balances and the daily limit (the customer holds `transferredToday`). */
+function refreshBalances(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: customerQuery.queryKey })
+  void queryClient.invalidateQueries({ queryKey: accountsQuery.queryKey })
 }
 
 /**
@@ -22,17 +29,13 @@ export function useCreateTransfer() {
   return useMutation({
     mutationFn: createTransfer,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['customer'] })
-      void queryClient.invalidateQueries({ queryKey: ['accounts'] })
-      void queryClient.invalidateQueries({ queryKey: ['transactions'] })
+      refreshBalances(queryClient)
+      void queryClient.invalidateQueries({ queryKey: recentTransactionsQuery.queryKey })
     },
     onError: (error) => {
       // 422 = balance or limit changed since we loaded them; refresh so the
       // form's own rules use the new numbers.
-      if (error instanceof ApiError && error.status === 422) {
-        void queryClient.invalidateQueries({ queryKey: ['customer'] })
-        void queryClient.invalidateQueries({ queryKey: ['accounts'] })
-      }
+      if (error instanceof ApiError && error.status === 422) refreshBalances(queryClient)
     },
   })
 }

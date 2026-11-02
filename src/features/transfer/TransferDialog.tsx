@@ -7,7 +7,7 @@ import { useCreateTransfer } from '../../api/transfers'
 import type { Account, Customer } from '../../api/types'
 import { Button } from '../../components/Button'
 import { formatMoney } from '../../lib/format'
-import { toCents } from '../../lib/money'
+import { depositAccounts, remainingLimit } from '../../lib/money'
 import { AmountStep } from './AmountStep'
 import { DiscardPanel } from './DiscardPanel'
 import { RecipientStep } from './RecipientStep'
@@ -71,15 +71,11 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
   const amountRecipientRef = useRef<string | null>(null)
   const mutation = useCreateTransfer()
 
-  const depositAccounts = useMemo(
-    () => accounts.filter((account) => account.type !== 'credit'),
-    [accounts],
-  )
-  const remainingLimit =
-    (toCents(customer.dailyTransferLimit) - toCents(customer.transferredToday)) / 100
+  const deposits = useMemo(() => depositAccounts(accounts), [accounts])
+  const limit = remainingLimit(customer)
   const schema = useMemo(
-    () => makeTransferSchema({ accounts: depositAccounts, remainingLimit }),
-    [depositAccounts, remainingLimit],
+    () => makeTransferSchema({ accounts: deposits, remainingLimit: limit }),
+    [deposits, limit],
   )
 
   const form = useForm<TransferFormValues>({
@@ -89,7 +85,7 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
     defaultValues: {
       payeeId: '',
       recipient: { name: '', accountNumber: '', bank: '' },
-      fromAccountId: depositAccounts[0]?.id ?? '',
+      fromAccountId: deposits[0]?.id ?? '',
       amount: '',
       note: '',
     },
@@ -224,12 +220,9 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
 
               {step === 'recipient' && <RecipientStep />}
               {step === 'amount' && (
-                <AmountStep
-                  depositAccounts={depositAccounts}
-                  remainingLimit={remainingLimit}
-                />
+                <AmountStep depositAccounts={deposits} remainingLimit={limit} />
               )}
-              {step === 'review' && <ReviewStep depositAccounts={depositAccounts} />}
+              {step === 'review' && <ReviewStep depositAccounts={deposits} />}
 
               {step === 'review' && mutation.isError && (
                 <p role="alert" className={styles.alert}>
