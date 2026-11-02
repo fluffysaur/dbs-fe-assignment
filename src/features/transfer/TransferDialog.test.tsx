@@ -270,3 +270,23 @@ describe('send to someone new', () => {
     expect(scroll).not.toHaveBeenCalled()
   })
 })
+
+describe('closing a half-filled transfer', () => {
+  it('asks first, with focus on Keep editing, and Keep editing restores the form', async () => {
+    const { user } = renderApp()
+    const dialog = await startTransferToJamie(user)
+    await fillAmountStep(user, dialog)
+
+    await user.click(within(dialog).getByRole('button', { name: 'Close' }))
+
+    expect(
+      within(dialog).getByRole('heading', { name: 'Discard this transfer?' }),
+    ).toBeInTheDocument()
+    // The safe choice has focus, so a stray Enter keeps the user's work.
+    expect(within(dialog).getByRole('button', { name: 'Keep editing' })).toHaveFocus()
+
+    await user.click(within(dialog).getByRole('button', { name: 'Keep editing' }))
+    await within(dialog).findByRole('heading', { name: 'How much?' })
+    expectAmountStep(dialog, '75', 'Dinner')
+  })
+})

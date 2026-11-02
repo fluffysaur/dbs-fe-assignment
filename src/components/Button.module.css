@@ -49,3 +49,25 @@
 .ghost:hover:not(:disabled) {
   background: var(--brand-soft);
 }
+
+/* Destructive actions. Soft, not filled: filled red needs a new text colour in
+   dark mode and looks like Premium's crimson primary. Hover and press tint the
+   background and pull the label towards --text, so contrast stays >= 4.5:1. */
+.danger {
+  background: var(--negative-soft);
+  border-color: var(--negative);
+  color: var(--negative);
+}
+
+.danger:hover:not(:disabled),
+.danger:active:not(:disabled) {
+  color: color-mix(in srgb, var(--text) 25%, var(--negative));
+}
+
+.danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--negative) 10%, var(--negative-soft));
+}
+
+.danger:active:not(:disabled) {
+  background: color-mix(in srgb, var(--negative) 18%, var(--negative-soft));
+}

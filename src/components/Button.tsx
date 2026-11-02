@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react'
 import styles from './Button.module.css'
 
 interface Props extends ComponentProps<'button'> {
-  variant?: 'primary' | 'secondary' | 'ghost'
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger'
 }
 
 /** Defaults to type="button" so it never submits a form by accident. */

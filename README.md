@@ -90,6 +90,10 @@ runs, and ✕/Back/Esc are blocked so a transfer can't be lost mid-flight.
 backdrop. It's rendered only while open, so every transfer starts with a fresh form. On open and on each
 step change, focus moves to the step heading so screen readers announce it. On close, focus returns to
 `New transfer`. Closing a half-filled form shows `Discard this transfer?` inside the same dialog.
+`Discard` is a soft red `danger` button (`--negative` on `--negative-soft`) with a warning icon above
+the heading, so it can't be mistaken for `Continue` or `Send`. Focus starts on `Keep editing`, so a
+stray Enter keeps the user's work. Filled red was ruled out: in dark mode `--negative` is a pale pink
+that white text fails on, and in Premium it looks like the crimson primary button.
 
 - Centred at 520px from 1024px; a full-screen sheet below that.
 - Gotcha: the effect calls `showModal()` and never `close()` on cleanup, because React StrictMode would
@@ -116,13 +120,15 @@ it's preselected because there are no saved payees, and not when coming `Back` t
 - Choices are saved only when the user toggles.
 - Components use token variables only; the one literal colour is in the static favicon.
 - I checked every text/background token pair the app uses: all ≥ 4.5:1 in the four combinations.
+  This includes the `danger` button's hover and press shades (made with `color-mix()` from tokens),
+  where the label is pulled slightly towards `--text` to stay above 4.5:1 in light mode.
 
 **Layout (D8, §5).** One column below 1024px with stacked account cards (no hidden sideways-scrolling
 row). Below 640px, `New transfer` is fixed at the bottom above the safe area, and the segment switch moves
 under the greeting. Every tap target is ≥ 44px. Verified no sideways scroll at 360px and 390px.
 
 **Motion and illustrations.** A deliberate, small layer of polish to make the app feel finished without
-much extra code. Empty, error and success screens get a lucide icon in a tinted circle (`SpotIcon`, one
+much extra code. Empty, error, success and discard screens get a lucide icon in a tinted circle (`SpotIcon`, one
 token pair per tone). The dialog, each step and the loaded dashboard fade in, the success circle pops in,
 and `Sending…` gets a spinner. All CSS, existing motion tokens only, `opacity`/`transform` only, each plays
 once, and the reduced-motion rule turns them off. Left out on purpose: a balance count-up (noisy for screen
@@ -157,7 +163,7 @@ the dialog refetches when it opens.
 
 ## Tests
 
-`npm test`: 19 tests. The integration tests render the whole `<App />` against the real MSW handlers
+`npm test`: 24 tests. The integration tests render the whole `<App />` against the real MSW handlers
 and use `user-event`, so they check what a user sees, not component internals.
 
 | Test                                                                                                                                                                                                      | Why                                                                                                                                |
@@ -168,6 +174,7 @@ and use `user-event`, so they check what a user sees, not component internals.
 | Note `#fail` → alert with the brief's copy, still on review, data shown, Confirm enabled, no success                                                                                                      | T7: "never show success after a failure".                                                                                          |
 | Search by category (`DINING`), no-match state, `Clear search` restores 8 rows                                                                                                                             | D6.                                                                                                                                |
 | Picking `Send to someone new` scrolls the fields into view; the automatic preselect and coming `Back` to the step don't                                                                                   | Only the user's own choice triggers the scroll. jsdom has no `scrollIntoView`, so it's stubbed.                                    |
+| Closing a half-filled form with ✕ → `Discard this transfer?` with focus on `Keep editing` → `Keep editing` brings back the amount and note                                                                | Focus on the safe choice is the part most likely to break unnoticed.                                                               |
 | `schema.test.ts`: amount format, min 1.00, 2 decimals, **exact balance passes / +0.01 fails**, daily limit, note length, payee/new recipient rules, and a recipient error while the amount is still empty | Fast checks of every rule, including the cents edge case and the cross-field case (step 1 is checked while step 2 is still blank). |
 
 Test notes:
@@ -237,6 +244,11 @@ mostly by the tests and the browser checks, not by the first draft being right:
 - **Revealing the new-recipient fields.** I noticed that picking `Send to someone new` gave no sign that
   more fields had opened below the list. The AI build had left this out, so I asked for it to be added.
   Claude laid out the options and I chose scroll-only (see Decisions).
+- **Discard prompt styling.** The AI build styled `Discard` as the brand-colour primary, so it looked
+  like `Continue` and `Send`. I made it a soft red `danger` button, added a warning icon, and kept focus
+  on `Keep editing` (see Dialog in Decisions). Claude's first hover and press shades dropped below 4.5:1
+  in light mode; the contrast check caught it and the label colour was adjusted. A new test covers the
+  prompt: it opens with focus on `Keep editing`, and `Keep editing` brings back the filled-in form.
 
 ## Not done / known issues
 
