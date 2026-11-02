@@ -178,9 +178,10 @@ describe('transfer', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Confirm transfer' }))
     expect(within(dialog).getByRole('button', { name: 'Sending…' })).toBeDisabled()
 
+    // Focus moves to the result so screen readers announce it.
     expect(
       await within(dialog).findByRole('heading', { name: 'Transfer sent' }),
-    ).toBeInTheDocument()
+    ).toHaveFocus()
     expect(within(dialog).getByText(/^TRF-/)).toBeInTheDocument()
     expect(within(dialog).getByText(money(120))).toBeInTheDocument()
 
