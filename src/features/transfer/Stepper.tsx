@@ -1,14 +1,14 @@
 import styles from './TransferDialog.module.css'
 
-export type FormStep = 'recipient' | 'amount' | 'review'
+export type Step = 'recipient' | 'amount' | 'review'
 
-const STEPS: { id: FormStep; label: string }[] = [
+const STEPS: { id: Step; label: string }[] = [
   { id: 'recipient', label: 'Recipient' },
   { id: 'amount', label: 'Amount' },
   { id: 'review', label: 'Review' },
 ]
 
-export function Stepper({ current }: { current: FormStep }) {
+export function Stepper({ current }: { current: Step }) {
   const currentIndex = STEPS.findIndex((step) => step.id === current)
   return (
     <ol className={styles.stepper} aria-label="Transfer steps">

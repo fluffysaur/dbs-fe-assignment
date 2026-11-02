@@ -13,14 +13,12 @@ import { DiscardPanel } from './DiscardPanel'
 import { RecipientStep } from './RecipientStep'
 import { ReviewStep } from './ReviewStep'
 import { makeTransferSchema, NEW_RECIPIENT, type TransferFormValues } from './schema'
-import { type FormStep, Stepper } from './Stepper'
+import { type Step, Stepper } from './Stepper'
 import { SuccessPanel } from './SuccessPanel'
 import { toTransferRequest } from './toTransferRequest'
 import styles from './TransferDialog.module.css'
 
-type Step = FormStep | 'success'
-
-const STEP_TITLES: Record<FormStep, string> = {
+const STEP_TITLES: Record<Step, string> = {
   recipient: 'Who are you sending to?',
   amount: 'How much?',
   review: 'Check the details',
@@ -92,6 +90,8 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
   })
   const { isDirty } = form.formState
   const isSending = mutation.isPending
+  // Set once the API confirms the transfer: the dialog then shows success.
+  const transfer = mutation.data?.transfer
 
   // Open as a modal: the browser traps focus and handles Esc. No close() in
   // a cleanup: StrictMode would run it and close the dialog straight away.
@@ -100,15 +100,15 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
     if (dialog && !dialog.open) dialog.showModal()
   }, [])
 
-  // Move focus to the step's heading so screen readers announce it.
+  // Move focus to the step's (or success) heading so screen readers announce it.
   useEffect(() => {
     if (!confirmingDiscard) headingRef.current?.focus()
-  }, [step, confirmingDiscard])
+  }, [step, transfer, confirmingDiscard])
 
   /** ✕, Cancel and Esc all come here. The native `close` event calls onClose. */
   function requestClose() {
     if (isSending) return
-    if (step === 'success' || !isDirty) {
+    if (transfer || !isDirty) {
       dialogRef.current?.close()
     } else {
       setConfirmingDiscard(true)
@@ -140,7 +140,6 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
   function send(values: TransferFormValues) {
     if (isSending) return
     mutation.mutate(toTransferRequest(values), {
-      onSuccess: () => setStep('success'),
       onError: (error) => {
         // Put server field errors under their fields (seen after Back).
         if (error instanceof ApiError && error.fields) {
@@ -154,15 +153,13 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (step === 'recipient' || step === 'amount') {
-      void goNext(step)
-    } else if (step === 'review') {
+    if (step === 'review') {
       // Final check with the same schema before sending.
       void form.handleSubmit(send)()
+    } else {
+      void goNext(step)
     }
   }
-
-  const transfer = mutation.data?.transfer
 
   return (
     <dialog
@@ -202,13 +199,13 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
           onKeepEditing={() => setConfirmingDiscard(false)}
           onDiscard={() => dialogRef.current?.close()}
         />
-      ) : step === 'success' && transfer ? (
+      ) : transfer ? (
         <SuccessPanel
           transfer={transfer}
           headingRef={headingRef}
           onDone={() => dialogRef.current?.close()}
         />
-      ) : step !== 'success' ? (
+      ) : (
         <FormProvider {...form}>
           <form className={styles.form} noValidate onSubmit={handleSubmit}>
             {/* Keyed by step so each step plays the entry animation. */}
@@ -257,7 +254,7 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
             </div>
           </form>
         </FormProvider>
-      ) : null}
+      )}
     </dialog>
   )
 }
