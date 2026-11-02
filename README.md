@@ -18,7 +18,7 @@ src/
     transfer/       The dialog: steps, stepper, success/discard panels, schema.ts (all rules)
     theme/          usePreferences (light/dark + Retail/Premium), the two toggles
   components/       Shared UI: Header, Button, Field, InlineError, Skeleton, EmptyState
-  lib/              format.ts (given), money.ts (cents, masking), demoParams.ts (demo URL hooks)
+  lib/              format.ts (given), money.ts (money rules: cents, masking, total available, remaining limit), demoParams.ts (demo URL hooks)
   test/             MSW + jsdom setup, renderApp helper
 ```
 

@@ -1,6 +1,6 @@
 import type { Customer } from '../../api/types'
 import { formatMoney } from '../../lib/format'
-import { toCents } from '../../lib/money'
+import { remainingLimit } from '../../lib/money'
 import styles from './DailyLimitCard.module.css'
 import dashboard from './Dashboard.module.css'
 
@@ -11,7 +11,7 @@ interface Props {
 export function DailyLimitCard({ customer }: Props) {
   const limit = customer.dailyTransferLimit
   const used = customer.transferredToday
-  const remaining = (toCents(limit) - toCents(used)) / 100
+  const remaining = remainingLimit(customer)
   const usedPercent = limit > 0 ? Math.min(100, (used / limit) * 100) : 0
 
   return (
