@@ -20,6 +20,20 @@ if (!HTMLDialogElement.prototype.showModal) {
   }
 }
 
+// jsdom has no scrollIntoView or matchMedia either.
+Element.prototype.scrollIntoView ??= function () {}
+window.matchMedia ??= (query: string) =>
+  ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener() {},
+    removeEventListener() {},
+    addListener() {},
+    removeListener() {},
+    dispatchEvent: () => false,
+  }) as MediaQueryList
+
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }))
 beforeEach(() => {
   resetMockDb()

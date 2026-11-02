@@ -1,6 +1,7 @@
 import { screen, within } from '@testing-library/react'
 import type { UserEvent } from '@testing-library/user-event'
-import { afterEach, describe, expect, it } from 'vitest'
+import { http, HttpResponse } from 'msw'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { money, renderApp } from '../../test/renderApp'
 import { server } from '../../test/setup'
 
@@ -214,5 +215,58 @@ describe('transfer', () => {
     expect(within(dialog).getByText('Lunch #fail')).toBeInTheDocument()
     expect(within(dialog).getByRole('button', { name: 'Confirm transfer' })).toBeEnabled()
     expect(within(dialog).queryByText('Transfer sent')).not.toBeInTheDocument()
+  })
+})
+
+describe('send to someone new', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it('scrolls the new-recipient fields into view only when the user picks it', async () => {
+    const scroll = vi.spyOn(Element.prototype, 'scrollIntoView')
+    const { user } = renderApp()
+    await user.click(await screen.findByRole('button', { name: 'New transfer' }))
+    const dialog = screen.getByRole('dialog', { name: 'New transfer' })
+
+    await user.click(
+      await within(dialog).findByRole('radio', { name: 'Send to someone new' }),
+    )
+    const name = within(dialog).getByRole('textbox', { name: 'Recipient name' })
+    expect(scroll).toHaveBeenCalledTimes(1)
+    expect(scroll.mock.contexts[0]).toContainElement(name)
+    // Focus stays in the radio group.
+    expect(
+      within(dialog).getByRole('radio', { name: 'Send to someone new' }),
+    ).toHaveFocus()
+
+    // Coming back to the step with it already selected doesn't scroll again.
+    await user.type(name, 'Lee Wei')
+    await user.type(
+      within(dialog).getByRole('textbox', { name: 'Account number (8 digits)' }),
+      '12345678',
+    )
+    await user.selectOptions(
+      within(dialog).getByRole('combobox', { name: 'Bank' }),
+      'DBS',
+    )
+    await user.click(within(dialog).getByRole('button', { name: 'Continue' }))
+    await within(dialog).findByRole('heading', { name: 'How much?' })
+    await user.click(within(dialog).getByRole('button', { name: 'Back' }))
+    expect(within(dialog).getByRole('textbox', { name: 'Recipient name' })).toBeVisible()
+    expect(scroll).toHaveBeenCalledTimes(1)
+  })
+
+  it("doesn't scroll when it's preselected because there are no saved payees", async () => {
+    server.use(http.get('*/api/payees', () => HttpResponse.json({ payees: [] })))
+    const scroll = vi.spyOn(Element.prototype, 'scrollIntoView')
+    const { user } = renderApp()
+    await user.click(await screen.findByRole('button', { name: 'New transfer' }))
+    const dialog = screen.getByRole('dialog', { name: 'New transfer' })
+
+    expect(await within(dialog).findByText('No saved payees yet.')).toBeInTheDocument()
+    expect(
+      within(dialog).getByRole('radio', { name: 'Send to someone new' }),
+    ).toBeChecked()
+    expect(within(dialog).getByRole('textbox', { name: 'Recipient name' })).toBeVisible()
+    expect(scroll).not.toHaveBeenCalled()
   })
 })

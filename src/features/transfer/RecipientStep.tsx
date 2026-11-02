@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Plus } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { payeesQuery } from '../../api/queries'
 import { Button } from '../../components/Button'
@@ -21,6 +21,22 @@ export function RecipientStep() {
   const payeeId = useWatch({ control, name: 'payeeId' })
   const payees = useQuery(payeesQuery)
   const [search, setSearch] = useState('')
+  const payeeField = register('payeeId')
+
+  // When the user picks "Send to someone new", scroll its fields into view:
+  // with several payees they open below the fold. Only on the user's own
+  // pick, not the automatic preselect or coming back to this step.
+  const fieldsRef = useRef<HTMLDivElement>(null)
+  const revealFields = useRef(false)
+  useEffect(() => {
+    if (payeeId !== NEW_RECIPIENT || !revealFields.current) return
+    revealFields.current = false
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    fieldsRef.current?.scrollIntoView({
+      block: 'nearest',
+      behavior: reduceMotion ? 'auto' : 'smooth',
+    })
+  }, [payeeId])
 
   // No saved payees: preselect "Send to someone new" (as the default, so the
   // form doesn't count as changed).
@@ -94,7 +110,7 @@ export function RecipientStep() {
 
         {visiblePayees.map((payee) => (
           <label key={payee.id} className={styles.payee}>
-            <input type="radio" value={payee.id} {...register('payeeId')} />
+            <input type="radio" value={payee.id} {...payeeField} />
             <span className={styles.initials} aria-hidden>
               {payee.initials}
             </span>
@@ -108,7 +124,15 @@ export function RecipientStep() {
         ))}
 
         <label className={styles.payee}>
-          <input type="radio" value={NEW_RECIPIENT} {...register('payeeId')} />
+          <input
+            type="radio"
+            value={NEW_RECIPIENT}
+            {...payeeField}
+            onChange={(event) => {
+              revealFields.current = true
+              return payeeField.onChange(event)
+            }}
+          />
           <span className={styles.initials} aria-hidden>
             <Plus size={18} />
           </span>
@@ -117,7 +141,7 @@ export function RecipientStep() {
       </fieldset>
 
       {payeeId === NEW_RECIPIENT && (
-        <div className={styles.fields}>
+        <div ref={fieldsRef} className={styles.fields}>
           <Field
             id="recipient-name"
             label="Recipient name"

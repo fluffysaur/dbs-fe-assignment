@@ -95,6 +95,18 @@ step change, focus moves to the step heading so screen readers announce it. On c
 - Gotcha: the effect calls `showModal()` and never `close()` on cleanup, because React StrictMode would
   run that cleanup and immediately close the dialog.
 
+**Picking `Send to someone new` scrolls its fields into view.** The fields open below the payee list, so
+with several payees they appear off screen. Without a scroll, the user only finds them by scrolling or by
+pressing `Continue` and hitting an error. The dialog now scrolls just far enough to show all three fields,
+smoothly unless the user prefers reduced motion. It only scrolls when the user picks the option: not when
+it's preselected because there are no saved payees, and not when coming `Back` to the step.
+
+- **Scroll, not focus.** Focus stays on the radio. Arrow keys change the selection in a radio group, so
+  moving focus into `Recipient name` would pull keyboard users out of the list just by passing over the
+  option.
+- **Layout kept.** I didn't move `Send to someone new` to the top. Saved payees stay first, as in the
+  wireframe.
+
 **Theming (TH1–TH3).**
 
 - An inline script in `index.html` sets `data-theme` (saved choice, else the system setting) and the
@@ -145,7 +157,7 @@ the dialog refetches when it opens.
 
 ## Tests
 
-`npm test`: 17 tests. The integration tests render the whole `<App />` against the real MSW handlers
+`npm test`: 19 tests. The integration tests render the whole `<App />` against the real MSW handlers
 and use `user-event`, so they check what a user sees, not component internals.
 
 | Test                                                                                                                                                                                                      | Why                                                                                                                                |
@@ -155,6 +167,7 @@ and use `user-event`, so they check what a user sees, not component internals.
 | Dashboard 500 (one-off `server.use`) → error → `Retry` → loaded                                                                                                                                           | Required (E4.3).                                                                                                                   |
 | Note `#fail` → alert with the brief's copy, still on review, data shown, Confirm enabled, no success                                                                                                      | T7: "never show success after a failure".                                                                                          |
 | Search by category (`DINING`), no-match state, `Clear search` restores 8 rows                                                                                                                             | D6.                                                                                                                                |
+| Picking `Send to someone new` scrolls the fields into view; the automatic preselect and coming `Back` to the step don't                                                                                   | Only the user's own choice triggers the scroll. jsdom has no `scrollIntoView`, so it's stubbed.                                    |
 | `schema.test.ts`: amount format, min 1.00, 2 decimals, **exact balance passes / +0.01 fails**, daily limit, note length, payee/new recipient rules, and a recipient error while the amount is still empty | Fast checks of every rule, including the cents edge case and the cross-field case (step 1 is checked while step 2 is still blank). |
 
 Test notes:
@@ -162,7 +175,7 @@ Test notes:
 - Mock responses take ~500 ms, so the async query timeout is 3 s.
 - Money assertions use `money()` (`test/renderApp.tsx`), which is `formatMoney` with the non-breaking
   space normalised the way Testing Library normalises page text.
-- jsdom has no `showModal`, so `test/setup.ts` stubs it.
+- jsdom has no `showModal`, `scrollIntoView` or `matchMedia`, so `test/setup.ts` stubs them.
 
 ## AI use
 
@@ -221,6 +234,9 @@ mostly by the tests and the browser checks, not by the first draft being right:
 - **Motion and illustrations** (see Decisions). My idea, scoped down against the brief before
   building: I dropped a separate "sending" screen, a self-drawing tick and dimming the review step.
   The payee list's `No saved payees yet.` stays plain text because it sits inside the form.
+- **Revealing the new-recipient fields.** I noticed that picking `Send to someone new` gave no sign that
+  more fields had opened below the list. The AI build had left this out, so I asked for it to be added.
+  Claude laid out the options and I chose scroll-only (see Decisions).
 
 ## Not done / known issues
 
