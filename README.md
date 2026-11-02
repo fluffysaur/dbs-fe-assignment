@@ -107,6 +107,31 @@ it's preselected because there are no saved payees, and not when coming `Back` t
 - **Layout kept.** I didn't move `Send to someone new` to the top. Saved payees stay first, as in the
   wireframe.
 
+**`Make another transfer`, and step 2 waits for fresh balances (T3, T5).** The wireframe's optional
+second button on the success screen, added below `Back to dashboard`, which stays the primary button as
+in T5. It resets the dialog in place to a blank step 1, the same as opening it fresh, and focus moves to
+the step heading.
+
+- **Step 2 waits for the new numbers.** After a transfer, the balance and limit refetch in the
+  background. Someone quick could reach step 2 while it still shows the old, higher numbers, pass the
+  client check, and only be stopped by a 422 on Confirm. So until both have reloaded, the two values
+  show skeletons (`aria-busy`) and `Continue` is disabled. The same happens after a 422 on review, which
+  also refreshes them.
+- **Only refreshes caused by a transfer count.** The dialog notes when a transfer (or a 422) made the
+  numbers out of date and waits for data newer than that. A routine refetch, such as on window focus,
+  doesn't flash the skeleton.
+- **An amount typed during the wait is re-checked** when the new numbers land, so an over-balance error
+  shows without another keystroke.
+- **If the refresh fails**, the values are replaced with `We couldn't load your latest balance.` +
+  `Retry` (my wording; the brief has none), and `Continue` stays disabled.
+- **Why block on step 2, not on the button.** The wait sits where the numbers are used, and the success
+  screen keeps two plain buttons. Step 1 usually takes longer than the refetch, so most people never
+  see it.
+
+**No arrival-time line on review.** The wireframe shows `i Usually arrives in minutes.` on the review
+step. The brief doesn't ask for it there (T4), and it fixes `The money should arrive within minutes.` for
+the success screen, so showing both would repeat the same message one screen apart. It's on success only.
+
 **Theming (TH1–TH3).**
 
 - An inline script in `index.html` sets `data-theme` (saved choice, else the system setting) and the
@@ -133,8 +158,7 @@ the review while sending (lower text contrast would break TH3).
 (dialog, radios, select) rather than a component library, since they're accessible by default and
 there's less to explain.
 
-**What I'd change with more time.** A `Make another transfer` button; an end-to-end test against the
-deployed site; follow live OS theme changes until the user picks one; server-side search for a full
+**What I'd change with more time.** An end-to-end test against the deployed site; follow live OS theme changes until the user picks one; server-side search for a full
 history view.
 
 ## Loading, empty and error states
@@ -150,6 +174,7 @@ On the deployed site, add these to the page URL. `lib/demoParams.ts` forwards th
 | Field errors      | e.g. amount `5000` from checking, or account number `123`            | Message under the field; Continue focuses it                                                                                                                                                 |
 | Send failure      | put `#fail` in the transfer note                                     | Alert on the review step; data kept; Confirm works again                                                                                                                                     |
 | Payee loading     | `?delay=3000`, then open the dialog as soon as the dashboard appears | Skeleton rows in step 1                                                                                                                                                                      |
+| Fresh balances    | `?delay=3000`, send a transfer, then quickly `Make another transfer` | Step 2 shows skeletons for the balance and limit, with `Continue` disabled, until they reload                                                                                                |
 
 The payee error state (`We couldn't load your saved payees.` + Retry, with `Send to someone new` still
 usable) isn't reachable from the URL. The one-off `?scenario=error` hits the background prefetch, and
@@ -157,7 +182,7 @@ the dialog refetches when it opens.
 
 ## Tests
 
-`npm test`: 19 tests. The integration tests render the whole `<App />` against the real MSW handlers
+`npm test`: 29 tests. The integration tests render the whole `<App />` against the real MSW handlers
 and use `user-event`, so they check what a user sees, not component internals.
 
 | Test                                                                                                                                                                                                      | Why                                                                                                                                |
@@ -167,6 +192,8 @@ and use `user-event`, so they check what a user sees, not component internals.
 | Dashboard 500 (one-off `server.use`) → error → `Retry` → loaded                                                                                                                                           | Required (E4.3).                                                                                                                   |
 | Note `#fail` → alert with the brief's copy, still on review, data shown, Confirm enabled, no success                                                                                                      | T7: "never show success after a failure".                                                                                          |
 | Search by category (`DINING`), no-match state, `Clear search` restores 8 rows                                                                                                                             | D6.                                                                                                                                |
+| `Make another transfer` → blank step 1 with focus on its heading → step 2 shows no old numbers and `Continue` is disabled until the held accounts refetch is released → second transfer succeeds          | The added button, and that step 2 never checks against pre-transfer numbers.                                                       |
+| An amount typed during that wait is re-checked when the new balance lands; a failed refresh shows `Retry`, then the new balance                                                                           | Stops a stale "valid" amount, and the refresh error isn't a dead end.                                                              |
 | Picking `Send to someone new` scrolls the fields into view; the automatic preselect and coming `Back` to the step don't                                                                                   | Only the user's own choice triggers the scroll. jsdom has no `scrollIntoView`, so it's stubbed.                                    |
 | `schema.test.ts`: amount format, min 1.00, 2 decimals, **exact balance passes / +0.01 fails**, daily limit, note length, payee/new recipient rules, and a recipient error while the amount is still empty | Fast checks of every rule, including the cents edge case and the cross-field case (step 1 is checked while step 2 is still blank). |
 
@@ -237,11 +264,15 @@ mostly by the tests and the browser checks, not by the first draft being right:
 - **Revealing the new-recipient fields.** I noticed that picking `Send to someone new` gave no sign that
   more fields had opened below the list. The AI build had left this out, so I asked for it to be added.
   Claude laid out the options and I chose scroll-only (see Decisions).
+- **Waiting for fresh balances on step 2.** Claude first suggested not blocking `Make another transfer`
+  and relying on the server's 422. I rejected that: even a tiny window can show a user an avoidable
+  error. Claude then proposed disabling the button, and I moved the wait to step 2 instead (see
+  Decisions). I also dropped the review step's arrival-time line as repetitive.
 
 ## Not done / known issues
 
 - Not built (optional): debug menu (URL params instead), balance-hide toggle, third segment, `#transfer`
-  deep link, end-to-end test, `Make another transfer`, the optional date line.
+  deep link, end-to-end test, the optional date line.
 - The OS theme is read on first load only. Changing it later doesn't update the app unless the user hasn't
   picked one and reloads.
 - If the API's default segment were `premium` and nothing was saved, the page would paint retail first
