@@ -1,11 +1,13 @@
 import { z } from 'zod'
 import type { Account } from '../../api/types'
 import { formatMoney } from '../../lib/format'
-import { AMOUNT_RE, toCents } from '../../lib/money'
+import { toCents } from '../../lib/money'
 
 /** Value of the "Send to someone new" radio in the payee list. */
 export const NEW_RECIPIENT = 'new'
 export const NOTE_MAX_LENGTH = 50
+const RECIPIENT_NAME_MIN_LENGTH = 2
+const RECIPIENT_NAME_MAX_LENGTH = 50
 export const TRANSFER_FEE = 0
 export const BANKS = [
     'DBS',
@@ -21,6 +23,8 @@ export const BANKS = [
 ]
 
 const NUMBER_RE = /^\d+(\.\d+)?$/
+/** A positive amount with at most 2 decimal places, e.g. `120`, `120.5`, `0.99`. */
+const AMOUNT_RE = /^\d+(\.\d{1,2})?$/
 const ACCOUNT_NUMBER_RE = /^\d{8}$/
 
 interface SchemaContext {
@@ -64,7 +68,10 @@ export function makeTransferSchema({ accounts, remainingLimit }: SchemaContext) 
                     ),
                 note: z
                     .string()
-                    .max(NOTE_MAX_LENGTH, 'Keep the note to 50 characters or fewer.'),
+                    .max(
+                        NOTE_MAX_LENGTH,
+                        `Keep the note to ${NOTE_MAX_LENGTH} characters or fewer.`,
+                    ),
             })
             // Rules that depend on more than one field. Zod 4 still runs these when
             // another field has failed (no field is ever undefined), so e.g. a
@@ -80,11 +87,14 @@ export function makeTransferSchema({ accounts, remainingLimit }: SchemaContext) 
 
                 if (values.payeeId === NEW_RECIPIENT) {
                     const name = values.recipient.name.trim()
-                    if (name.length < 2 || name.length > 50) {
+                    if (
+                        name.length < RECIPIENT_NAME_MIN_LENGTH ||
+                        name.length > RECIPIENT_NAME_MAX_LENGTH
+                    ) {
                         ctx.addIssue({
                             code: 'custom',
                             path: ['recipient', 'name'],
-                            message: 'Enter a recipient name (2–50 characters).',
+                            message: `Enter a recipient name (${RECIPIENT_NAME_MIN_LENGTH}–${RECIPIENT_NAME_MAX_LENGTH} characters).`,
                         })
                     }
                     if (!ACCOUNT_NUMBER_RE.test(values.recipient.accountNumber.trim())) {
