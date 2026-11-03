@@ -9,31 +9,31 @@ import { accountsQuery, customerQuery, recentTransactionsQuery } from '../../api
  * transfer) keeps showing that data instead of swapping to the error screen.
  */
 export function useDashboardData() {
-  const customer = useQuery(customerQuery)
-  const accounts = useQuery(accountsQuery)
-  const transactions = useQuery(recentTransactionsQuery)
-  const queries = [customer, accounts, transactions]
+    const customer = useQuery(customerQuery)
+    const accounts = useQuery(accountsQuery)
+    const transactions = useQuery(recentTransactionsQuery)
+    const queries = [customer, accounts, transactions]
 
-  if (customer.data && accounts.data && transactions.data) {
-    return {
-      status: 'success',
-      customer: customer.data,
-      accounts: accounts.data,
-      transactions: transactions.data,
-    } as const
-  }
+    if (customer.data && accounts.data && transactions.data) {
+        return {
+            status: 'success',
+            customer: customer.data,
+            accounts: accounts.data,
+            transactions: transactions.data,
+        } as const
+    }
 
-  if (queries.some((query) => query.isError && query.data === undefined)) {
-    return {
-      status: 'error',
-      isRetrying: queries.some((query) => query.isError && query.isFetching),
-      retry: () => {
-        for (const query of queries) {
-          if (query.isError) void query.refetch()
-        }
-      },
-    } as const
-  }
+    if (queries.some((query) => query.isError && query.data === undefined)) {
+        return {
+            status: 'error',
+            isRetrying: queries.some((query) => query.isError && query.isFetching),
+            retry: () => {
+                for (const query of queries) {
+                    if (query.isError) void query.refetch()
+                }
+            },
+        } as const
+    }
 
-  return { status: 'pending' } as const
+    return { status: 'pending' } as const
 }

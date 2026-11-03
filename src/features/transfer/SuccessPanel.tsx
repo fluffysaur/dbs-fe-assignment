@@ -7,37 +7,44 @@ import { formatMoney } from '../../lib/format'
 import styles from './TransferDialog.module.css'
 
 interface Props {
-  transfer: Transfer
-  headingRef: Ref<HTMLHeadingElement>
-  onDone: () => void
-  onAnother: () => void
+    transfer: Transfer
+    headingRef: Ref<HTMLHeadingElement>
+    onDone: () => void
+    onAnother: () => void
 }
 
 /** Everything shown here comes from the API response, not the form. */
 export function SuccessPanel({ transfer, headingRef, onDone, onAnother }: Props) {
-  const { recipient } = transfer
-  return (
-    <div className={styles.success}>
-      <SpotIcon icon={Check} tone="positive" size={64} className={styles.successIcon} />
-      <h3 ref={headingRef} tabIndex={-1} className={styles.stepTitle}>
-        Transfer sent
-      </h3>
-      <p className={`amount ${styles.successAmount}`}>{formatMoney(transfer.amount)}</p>
-      <p>
-        to {recipient.name} · {recipient.bank} ·{' '}
-        <span className="amount">{recipient.accountNumberMasked}</span>
-      </p>
-      <dl className={styles.reference}>
-        <dt>Reference</dt>
-        <dd className="amount">{transfer.reference}</dd>
-      </dl>
-      <p className={styles.hint}>The money should arrive within minutes.</p>
-      <div className={styles.successActions}>
-        <Button onClick={onDone}>Back to dashboard</Button>
-        <Button variant="secondary" onClick={onAnother}>
-          Make another transfer
-        </Button>
-      </div>
-    </div>
-  )
+    const { recipient } = transfer
+    return (
+        <div className={styles.success}>
+            <SpotIcon
+                icon={Check}
+                tone="positive"
+                size={64}
+                className={styles.successIcon}
+            />
+            <h3 ref={headingRef} tabIndex={-1} className={styles.stepTitle}>
+                Transfer sent
+            </h3>
+            <p className={`amount ${styles.successAmount}`}>
+                {formatMoney(transfer.amount)}
+            </p>
+            <p>
+                to {recipient.name} · {recipient.bank} ·{' '}
+                <span className="amount">{recipient.accountNumberMasked}</span>
+            </p>
+            <dl className={styles.reference}>
+                <dt>Reference</dt>
+                <dd className="amount">{transfer.reference}</dd>
+            </dl>
+            <p className={styles.hint}>The money should arrive within minutes.</p>
+            <div className={styles.successActions}>
+                <Button onClick={onDone}>Back to dashboard</Button>
+                <Button variant="secondary" onClick={onAnother}>
+                    Make another transfer
+                </Button>
+            </div>
+        </div>
+    )
 }

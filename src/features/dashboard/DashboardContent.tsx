@@ -10,43 +10,43 @@ import { TransactionList } from './TransactionList'
 import styles from './Dashboard.module.css'
 
 interface Props {
-  customer: Customer
-  accounts: Account[]
-  transactions: Transaction[]
+    customer: Customer
+    accounts: Account[]
+    transactions: Transaction[]
 }
 
 export function DashboardContent({ customer, accounts, transactions }: Props) {
-  // Load payees in the background so the transfer dialog opens ready.
-  usePrefetchQuery(payeesQuery)
+    // Load payees in the background so the transfer dialog opens ready.
+    usePrefetchQuery(payeesQuery)
 
-  const [isTransferOpen, setTransferOpen] = useState(false)
-  const newTransferButton = useRef<HTMLButtonElement>(null)
+    const [isTransferOpen, setTransferOpen] = useState(false)
+    const newTransferButton = useRef<HTMLButtonElement>(null)
 
-  return (
-    <div className={`${styles.layout} ${styles.fadeIn}`}>
-      <div className={styles.main}>
-        <BalanceHero
-          accounts={accounts}
-          onNewTransfer={() => setTransferOpen(true)}
-          buttonRef={newTransferButton}
-        />
-        <AccountList accounts={accounts} />
-        <TransactionList transactions={transactions} />
-      </div>
-      <aside aria-label="Daily limit">
-        <DailyLimitCard customer={customer} />
-      </aside>
-      {isTransferOpen && (
-        <TransferDialog
-          accounts={accounts}
-          customer={customer}
-          onClose={() => {
-            setTransferOpen(false)
-            // Focus goes back to the button that opened the dialog (T1).
-            newTransferButton.current?.focus()
-          }}
-        />
-      )}
-    </div>
-  )
+    return (
+        <div className={`${styles.layout} ${styles.fadeIn}`}>
+            <div className={styles.main}>
+                <BalanceHero
+                    accounts={accounts}
+                    onNewTransfer={() => setTransferOpen(true)}
+                    buttonRef={newTransferButton}
+                />
+                <AccountList accounts={accounts} />
+                <TransactionList transactions={transactions} />
+            </div>
+            <aside aria-label="Daily limit">
+                <DailyLimitCard customer={customer} />
+            </aside>
+            {isTransferOpen && (
+                <TransferDialog
+                    accounts={accounts}
+                    customer={customer}
+                    onClose={() => {
+                        setTransferOpen(false)
+                        // Focus goes back to the button that opened the dialog (T1).
+                        newTransferButton.current?.focus()
+                    }}
+                />
+            )}
+        </div>
+    )
 }

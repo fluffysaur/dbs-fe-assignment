@@ -5,34 +5,34 @@ import styles from './Field.module.css'
 export const inputClassName = styles.input
 
 interface Props {
-  id: string
-  label: string
-  error?: string
-  /** Shown at the end of the label row, e.g. a character counter. */
-  aside?: ReactNode
-  /** Shown under the error, e.g. help text. */
-  footer?: ReactNode
-  children: ReactNode
+    id: string
+    label: string
+    error?: string
+    /** Shown at the end of the label row, e.g. a character counter. */
+    aside?: ReactNode
+    /** Shown under the error, e.g. help text. */
+    footer?: ReactNode
+    children: ReactNode
 }
 
 export function Field({ id, label, error, aside, footer, children }: Props) {
-  return (
-    <div className={styles.field}>
-      <div className={styles.labelRow}>
-        <label htmlFor={id} className={styles.label}>
-          {label}
-        </label>
-        {aside}
-      </div>
-      {children}
-      <InlineError id={errorId(id)} message={error} />
-      {footer}
-    </div>
-  )
+    return (
+        <div className={styles.field}>
+            <div className={styles.labelRow}>
+                <label htmlFor={id} className={styles.label}>
+                    {label}
+                </label>
+                {aside}
+            </div>
+            {children}
+            <InlineError id={errorId(id)} message={error} />
+            {footer}
+        </div>
+    )
 }
 
 export function errorId(id: string) {
-  return `${id}-error`
+    return `${id}-error`
 }
 
 /**
@@ -40,10 +40,10 @@ export function errorId(id: string) {
  * with aria-describedby and marks it invalid.
  */
 export function fieldProps(id: string, error?: string, helpId?: string) {
-  const describedBy = [error ? errorId(id) : null, helpId].filter(Boolean)
-  return {
-    id,
-    'aria-invalid': error ? true : undefined,
-    'aria-describedby': describedBy.length ? describedBy.join(' ') : undefined,
-  }
+    const describedBy = [error ? errorId(id) : null, helpId].filter(Boolean)
+    return {
+        id,
+        'aria-invalid': error ? true : undefined,
+        'aria-describedby': describedBy.length ? describedBy.join(' ') : undefined,
+    }
 }

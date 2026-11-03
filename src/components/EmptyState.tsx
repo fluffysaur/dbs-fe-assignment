@@ -4,17 +4,17 @@ import { SpotIcon } from './SpotIcon'
 import styles from './EmptyState.module.css'
 
 interface Props {
-  message: string
-  icon?: LucideIcon
-  action?: ReactNode
+    message: string
+    icon?: LucideIcon
+    action?: ReactNode
 }
 
 export function EmptyState({ message, icon, action }: Props) {
-  return (
-    <div className={styles.empty}>
-      {icon && <SpotIcon icon={icon} />}
-      <p>{message}</p>
-      {action}
-    </div>
-  )
+    return (
+        <div className={styles.empty}>
+            {icon && <SpotIcon icon={icon} />}
+            <p>{message}</p>
+            {action}
+        </div>
+    )
 }
