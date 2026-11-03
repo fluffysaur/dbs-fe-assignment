@@ -53,7 +53,8 @@ whether the dialog is open, and the discard prompt.
   ready. The step still has its own loading, error + Retry and empty states.
 
 **Forms and validation (§3.3, E3).** One React Hook Form instance spans all three steps, so `Back`
-keeps everything with no extra code, with one deliberate exception below. Every rule is defined once, in `features/transfer/schema.ts`:
+keeps everything with no extra code (T4), even after picking a different recipient on step 1: review
+shows the recipient next to the amount before anything is sent. Every rule is defined once, in `features/transfer/schema.ts`:
 `makeTransferSchema({ accounts, remainingLimit })` builds the Zod schema from live data, so the balance
 and limit messages show real numbers. The same schema drives:
 
@@ -64,21 +65,6 @@ and limit messages show real numbers. The same schema drives:
 Inputs have no `maxLength` or `pattern` attributes, so no rule exists in two places. Form field names
 match the API's (`recipient.accountNumber`, `amount`…), so a server `fields` error maps straight onto
 `setError`. Messages reuse the API's wording, so the user reads the same text whichever side catches it.
-
-**Changing the recipient clears the amount and note (intentional).** The brief says `Back` keeps
-everything (T4), but only talks about going back from review. It doesn't say what happens when the user
-goes back to step 1 and picks someone else. I treat that as a safeguard: an amount and note typed for
-one person must not carry over to another without the user noticing. So on step 1's `Continue`:
-
-- **Same recipient**: step 2 keeps everything. Trying another payee and switching back before
-  `Continue` still counts as the same recipient.
-- **Different recipient**: the amount and note reset to empty, along with their errors.
-- **From-account is kept.** It's the user's own account, not tied to who gets paid, so resetting it
-  would silently undo a choice they made. Review shows it before sending.
-- **What counts as a different recipient**: a different saved payee, a switch between saved and new,
-  or a new recipient with a different account number or bank. Fixing a typo in the name doesn't count.
-
-No message is shown: the user lands on step 2 and sees the fields empty, as on their first visit.
 
 **Send failures (T7).** The dialog stays on review with the data intact. 500s and network errors show
 the brief's copy in a `role="alert"`. A 400/422 shows the API message plus the field message in the
@@ -192,7 +178,7 @@ not component internals.
 | Successful transfer → `Sending…` disabled, `Transfer sent` + reference → dashboard shows the new total, account balance, limit and `Transfer to Jamie Tan` row; focus back on `New transfer` | E4.2 (also T5, T6) |
 | Dashboard 500 (one-off `server.use`) → error → `Retry` → loaded                                                                                                                              | E4.3               |
 
-I kept to the three the brief asks for. Edge cases (exact balance vs +0.01, recipient changes, send
+I kept to the three the brief asks for. Edge cases (exact balance vs +0.01, send
 failure, `Make another transfer` waiting for fresh balances) were checked by hand in the browser with the demo hooks above. Unit tests for the schema and a
 send-failure test would be the next to add.
 
