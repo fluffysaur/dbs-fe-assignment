@@ -56,7 +56,7 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
     const headingRef = useRef<HTMLHeadingElement>(null)
     const [step, setStep] = useState<Step>('recipient')
     const [confirmingDiscard, setConfirmingDiscard] = useState(false)
-    const mutation = useCreateTransfer()
+    const transferMutation = useCreateTransfer()
     const [balancesChangedAt, setBalancesChangedAt] = useState<number | null>(null)
     const balances = useFreshBalances(balancesChangedAt)
     const waitingForBalances = step === 'amount' && balances.state !== 'ready'
@@ -79,9 +79,9 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
         },
     })
     const { isDirty } = form.formState
-    const isSending = mutation.isPending
+    const isSending = transferMutation.isPending
     // Set once the API confirms the transfer: the dialog then shows success.
-    const transfer = mutation.data?.transfer
+    const transfer = transferMutation.data?.transfer
 
     // Open as a modal: the browser traps focus and handles Esc. No close() in
     // a cleanup: StrictMode would run it and close the dialog straight away.
@@ -113,19 +113,19 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
     }
 
     function goBack() {
-        mutation.reset()
+        transferMutation.reset()
         setStep(step === 'review' ? 'amount' : 'recipient')
     }
 
     /** Back to a blank step 1, as if the dialog had just opened. */
     function startAnotherTransfer() {
-        mutation.reset()
+        transferMutation.reset()
         form.reset()
         setStep('recipient')
     }
 
     function send(values: TransferFormValues) {
-        mutation.mutate(toTransferRequest(values), {
+        transferMutation.mutate(toTransferRequest(values), {
             onSuccess: () => setBalancesChangedAt(Date.now()),
             onError: (error) => {
                 if (isBalanceChangedError(error)) setBalancesChangedAt(Date.now())
@@ -222,9 +222,9 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
                                 <ReviewStep depositAccounts={deposits} />
                             )}
 
-                            {step === 'review' && mutation.isError && (
+                            {step === 'review' && transferMutation.isError && (
                                 <p role="alert" className={styles.alert}>
-                                    {sendErrorMessage(mutation.error)}
+                                    {sendErrorMessage(transferMutation.error)}
                                 </p>
                             )}
                         </div>
