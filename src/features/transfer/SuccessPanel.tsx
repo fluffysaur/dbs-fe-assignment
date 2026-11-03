@@ -10,11 +10,10 @@ interface Props {
     transfer: Transfer
     headingRef: Ref<HTMLHeadingElement>
     onDone: () => void
-    onAnother: () => void
 }
 
 /** Everything shown here comes from the API response, not the form. */
-export function SuccessPanel({ transfer, headingRef, onDone, onAnother }: Props) {
+export function SuccessPanel({ transfer, headingRef, onDone }: Props) {
     const { recipient } = transfer
     return (
         <div className={styles.success}>
@@ -41,9 +40,6 @@ export function SuccessPanel({ transfer, headingRef, onDone, onAnother }: Props)
             <p className={styles.hint}>The money should arrive within minutes.</p>
             <div className={styles.successActions}>
                 <Button onClick={onDone}>Back to dashboard</Button>
-                <Button variant="secondary" onClick={onAnother}>
-                    Make another transfer
-                </Button>
             </div>
         </div>
     )
