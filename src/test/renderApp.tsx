@@ -6,16 +6,16 @@ import { formatMoney } from '../lib/format'
 
 /** Renders the whole app against the real mock API, with a fresh cache. */
 export function renderApp() {
-  const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: false } },
-  })
-  const user = userEvent.setup()
-  const utils = render(
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>,
-  )
-  return { user, ...utils }
+    const queryClient = new QueryClient({
+        defaultOptions: { queries: { retry: false } },
+    })
+    const user = userEvent.setup()
+    const utils = render(
+        <QueryClientProvider client={queryClient}>
+            <App />
+        </QueryClientProvider>,
+    )
+    return { user, ...utils }
 }
 
 /**
@@ -24,5 +24,5 @@ export function renderApp() {
  * we search for, so we do the same here.
  */
 export function money(amount: number) {
-  return formatMoney(amount).replace(/\u00a0/g, ' ')
+    return formatMoney(amount).replace(/\u00a0/g, ' ')
 }

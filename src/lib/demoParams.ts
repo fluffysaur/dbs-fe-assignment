@@ -15,25 +15,25 @@ const delay = pageParams.get('delay')
 const errorSent = new Set<string>()
 
 export function hasDemoScenario(): boolean {
-  return scenario !== null
+    return scenario !== null
 }
 
 export function withDemoParams(path: string, method = 'GET'): string {
-  if (!scenario && !delay) return path
+    if (!scenario && !delay) return path
 
-  const [pathname, query = ''] = path.split('?')
-  const params = new URLSearchParams(query)
+    const [pathname, query = ''] = path.split('?')
+    const params = new URLSearchParams(query)
 
-  if (scenario && method === 'GET') {
-    if (scenario !== 'error') {
-      params.set('scenario', scenario)
-    } else if (!errorSent.has(pathname)) {
-      errorSent.add(pathname)
-      params.set('scenario', 'error')
+    if (scenario && method === 'GET') {
+        if (scenario !== 'error') {
+            params.set('scenario', scenario)
+        } else if (!errorSent.has(pathname)) {
+            errorSent.add(pathname)
+            params.set('scenario', 'error')
+        }
     }
-  }
-  if (delay) params.set('delay', delay)
+    if (delay) params.set('delay', delay)
 
-  const search = params.toString()
-  return search ? `${pathname}?${search}` : pathname
+    const search = params.toString()
+    return search ? `${pathname}?${search}` : pathname
 }

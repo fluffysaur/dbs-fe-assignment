@@ -11,181 +11,194 @@ import { BANKS, NEW_RECIPIENT, type TransferFormValues } from './schema'
 import styles from './TransferDialog.module.css'
 
 export function RecipientStep() {
-  const {
-    register,
-    control,
-    getValues,
-    resetField,
-    formState: { errors },
-  } = useFormContext<TransferFormValues>()
-  const payeeId = useWatch({ control, name: 'payeeId' })
-  const payees = useQuery(payeesQuery)
-  const [search, setSearch] = useState('')
-  const payeeField = register('payeeId')
+    const {
+        register,
+        control,
+        getValues,
+        resetField,
+        formState: { errors },
+    } = useFormContext<TransferFormValues>()
+    const payeeId = useWatch({ control, name: 'payeeId' })
+    const payees = useQuery(payeesQuery)
+    const [search, setSearch] = useState('')
+    const payeeField = register('payeeId')
 
-  // When the user picks "Send to someone new", scroll its fields into view:
-  // with several payees they open below the fold. Only on the user's own
-  // pick, not the automatic preselect or coming back to this step.
-  const fieldsRef = useRef<HTMLDivElement>(null)
-  const revealFields = useRef(false)
-  useEffect(() => {
-    if (payeeId !== NEW_RECIPIENT || !revealFields.current) return
-    revealFields.current = false
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    fieldsRef.current?.scrollIntoView({
-      block: 'nearest',
-      behavior: reduceMotion ? 'auto' : 'smooth',
-    })
-  }, [payeeId])
+    // When the user picks "Send to someone new", scroll its fields into view:
+    // with several payees they open below the fold. Only on the user's own
+    // pick, not the automatic preselect or coming back to this step.
+    const fieldsRef = useRef<HTMLDivElement>(null)
+    const revealFields = useRef(false)
+    useEffect(() => {
+        if (payeeId !== NEW_RECIPIENT || !revealFields.current) return
+        revealFields.current = false
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        fieldsRef.current?.scrollIntoView({
+            block: 'nearest',
+            behavior: reduceMotion ? 'auto' : 'smooth',
+        })
+    }, [payeeId])
 
-  // No saved payees: preselect "Send to someone new" (as the default, so the
-  // form doesn't count as changed).
-  useEffect(() => {
-    if (payees.data?.length === 0 && !getValues('payeeId')) {
-      resetField('payeeId', { defaultValue: NEW_RECIPIENT })
-    }
-  }, [payees.data, getValues, resetField])
+    // No saved payees: preselect "Send to someone new" (as the default, so the
+    // form doesn't count as changed).
+    useEffect(() => {
+        if (payees.data?.length === 0 && !getValues('payeeId')) {
+            resetField('payeeId', { defaultValue: NEW_RECIPIENT })
+        }
+    }, [payees.data, getValues, resetField])
 
-  const query = search.trim().toLowerCase()
-  const visiblePayees = (payees.data ?? []).filter(
-    (payee) =>
-      payee.name.toLowerCase().includes(query) ||
-      payee.bank.toLowerCase().includes(query),
-  )
+    const query = search.trim().toLowerCase()
+    const visiblePayees = (payees.data ?? []).filter(
+        (payee) =>
+            payee.name.toLowerCase().includes(query) ||
+            payee.bank.toLowerCase().includes(query),
+    )
 
-  const recipientErrors = errors.recipient
-  const payeeError = errors.payeeId?.message
+    const recipientErrors = errors.recipient
+    const payeeError = errors.payeeId?.message
 
-  return (
-    <>
-      {payees.data && payees.data.length > 0 && (
-        <div>
-          <label htmlFor="payee-search" className="sr-only">
-            Search payees
-          </label>
-          <input
-            id="payee-search"
-            type="search"
-            className={inputClassName}
-            placeholder="Search payees"
-            autoComplete="off"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-        </div>
-      )}
+    return (
+        <>
+            {payees.data && payees.data.length > 0 && (
+                <div>
+                    <label htmlFor="payee-search" className="sr-only">
+                        Search payees
+                    </label>
+                    <input
+                        id="payee-search"
+                        type="search"
+                        className={inputClassName}
+                        placeholder="Search payees"
+                        autoComplete="off"
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                    />
+                </div>
+            )}
 
-      <InlineError id={errorId('payeeId')} message={payeeError} />
+            <InlineError id={errorId('payeeId')} message={payeeError} />
 
-      <fieldset
-        className={styles.payees}
-        aria-describedby={payeeError ? errorId('payeeId') : undefined}
-      >
-        <legend className="sr-only">Recipient</legend>
-
-        {payees.isPending &&
-          [1, 2, 3, 4].map((key) => (
-            <div key={key} className={styles.payee} aria-hidden>
-              <Skeleton width={40} height={40} round />
-              <Skeleton width="50%" height="1rem" />
-            </div>
-          ))}
-
-        {payees.isError && (
-          <div className={styles.notice}>
-            <p>We couldn&apos;t load your saved payees.</p>
-            <Button variant="ghost" onClick={() => void payees.refetch()}>
-              Retry
-            </Button>
-          </div>
-        )}
-
-        {payees.data?.length === 0 && (
-          <p className={styles.notice}>No saved payees yet.</p>
-        )}
-
-        {query && payees.data && payees.data.length > 0 && visiblePayees.length === 0 && (
-          <p className={styles.notice}>No payees match your search.</p>
-        )}
-
-        {visiblePayees.map((payee) => (
-          <label key={payee.id} className={styles.payee}>
-            <input type="radio" value={payee.id} {...payeeField} />
-            <span className={styles.initials} aria-hidden>
-              {payee.initials}
-            </span>
-            <span className={styles.payeeText}>
-              <span className={styles.payeeName}>{payee.name}</span>
-              <span className={`amount ${styles.payeeMeta}`}>
-                {payee.bank} · {payee.accountNumberMasked}
-              </span>
-            </span>
-          </label>
-        ))}
-
-        <label className={styles.payee}>
-          <input
-            type="radio"
-            value={NEW_RECIPIENT}
-            {...payeeField}
-            onChange={(event) => {
-              revealFields.current = true
-              return payeeField.onChange(event)
-            }}
-          />
-          <span className={styles.initials} aria-hidden>
-            <Plus size={18} />
-          </span>
-          <span className={styles.payeeName}>Send to someone new</span>
-        </label>
-      </fieldset>
-
-      {payeeId === NEW_RECIPIENT && (
-        <div ref={fieldsRef} className={styles.fields}>
-          <Field
-            id="recipient-name"
-            label="Recipient name"
-            error={recipientErrors?.name?.message}
-          >
-            <input
-              className={inputClassName}
-              autoComplete="off"
-              {...fieldProps('recipient-name', recipientErrors?.name?.message)}
-              {...register('recipient.name')}
-            />
-          </Field>
-          <Field
-            id="recipient-account"
-            label="Account number (8 digits)"
-            error={recipientErrors?.accountNumber?.message}
-          >
-            <input
-              className={`amount ${inputClassName}`}
-              inputMode="numeric"
-              autoComplete="off"
-              {...fieldProps(
-                'recipient-account',
-                recipientErrors?.accountNumber?.message,
-              )}
-              {...register('recipient.accountNumber')}
-            />
-          </Field>
-          <Field id="recipient-bank" label="Bank" error={recipientErrors?.bank?.message}>
-            <select
-              className={inputClassName}
-              {...fieldProps('recipient-bank', recipientErrors?.bank?.message)}
-              {...register('recipient.bank')}
+            <fieldset
+                className={styles.payees}
+                aria-describedby={payeeError ? errorId('payeeId') : undefined}
             >
-              <option value="">Choose a bank</option>
-              {BANKS.map((bank) => (
-                <option key={bank} value={bank}>
-                  {bank}
-                </option>
-              ))}
-            </select>
-          </Field>
-        </div>
-      )}
-    </>
-  )
+                <legend className="sr-only">Recipient</legend>
+
+                {payees.isPending &&
+                    [1, 2, 3, 4].map((key) => (
+                        <div key={key} className={styles.payee} aria-hidden>
+                            <Skeleton width={40} height={40} round />
+                            <Skeleton width="50%" height="1rem" />
+                        </div>
+                    ))}
+
+                {payees.isError && (
+                    <div className={styles.notice}>
+                        <p>We couldn&apos;t load your saved payees.</p>
+                        <Button variant="ghost" onClick={() => void payees.refetch()}>
+                            Retry
+                        </Button>
+                    </div>
+                )}
+
+                {payees.data?.length === 0 && (
+                    <p className={styles.notice}>No saved payees yet.</p>
+                )}
+
+                {query &&
+                    payees.data &&
+                    payees.data.length > 0 &&
+                    visiblePayees.length === 0 && (
+                        <p className={styles.notice}>No payees match your search.</p>
+                    )}
+
+                {visiblePayees.map((payee) => (
+                    <label key={payee.id} className={styles.payee}>
+                        <input type="radio" value={payee.id} {...payeeField} />
+                        <span className={styles.initials} aria-hidden>
+                            {payee.initials}
+                        </span>
+                        <span className={styles.payeeText}>
+                            <span className={styles.payeeName}>{payee.name}</span>
+                            <span className={`amount ${styles.payeeMeta}`}>
+                                {payee.bank} · {payee.accountNumberMasked}
+                            </span>
+                        </span>
+                    </label>
+                ))}
+
+                <label className={styles.payee}>
+                    <input
+                        type="radio"
+                        value={NEW_RECIPIENT}
+                        {...payeeField}
+                        onChange={(event) => {
+                            revealFields.current = true
+                            return payeeField.onChange(event)
+                        }}
+                    />
+                    <span className={styles.initials} aria-hidden>
+                        <Plus size={18} />
+                    </span>
+                    <span className={styles.payeeName}>Send to someone new</span>
+                </label>
+            </fieldset>
+
+            {payeeId === NEW_RECIPIENT && (
+                <div ref={fieldsRef} className={styles.fields}>
+                    <Field
+                        id="recipient-name"
+                        label="Recipient name"
+                        error={recipientErrors?.name?.message}
+                    >
+                        <input
+                            className={inputClassName}
+                            autoComplete="off"
+                            {...fieldProps(
+                                'recipient-name',
+                                recipientErrors?.name?.message,
+                            )}
+                            {...register('recipient.name')}
+                        />
+                    </Field>
+                    <Field
+                        id="recipient-account"
+                        label="Account number (8 digits)"
+                        error={recipientErrors?.accountNumber?.message}
+                    >
+                        <input
+                            className={`amount ${inputClassName}`}
+                            inputMode="numeric"
+                            autoComplete="off"
+                            {...fieldProps(
+                                'recipient-account',
+                                recipientErrors?.accountNumber?.message,
+                            )}
+                            {...register('recipient.accountNumber')}
+                        />
+                    </Field>
+                    <Field
+                        id="recipient-bank"
+                        label="Bank"
+                        error={recipientErrors?.bank?.message}
+                    >
+                        <select
+                            className={inputClassName}
+                            {...fieldProps(
+                                'recipient-bank',
+                                recipientErrors?.bank?.message,
+                            )}
+                            {...register('recipient.bank')}
+                        >
+                            <option value="">Choose a bank</option>
+                            {BANKS.map((bank) => (
+                                <option key={bank} value={bank}>
+                                    {bank}
+                                </option>
+                            ))}
+                        </select>
+                    </Field>
+                </div>
+            )}
+        </>
+    )
 }
