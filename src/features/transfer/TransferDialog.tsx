@@ -3,7 +3,7 @@ import { ArrowLeft, LoaderCircle, X } from 'lucide-react'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { type FieldPath, FormProvider, useForm } from 'react-hook-form'
 import { ApiError } from '../../api/client'
-import { useCreateTransfer } from '../../api/transfers'
+import { isBalanceChangedError, useCreateTransfer } from '../../api/transfers'
 import type { Account, Customer } from '../../api/types'
 import { Button } from '../../components/Button'
 import { formatMoney } from '../../lib/format'
@@ -17,6 +17,7 @@ import { type Step, Stepper } from './Stepper'
 import { SuccessPanel } from './SuccessPanel'
 import { toTransferRequest } from './toTransferRequest'
 import styles from './TransferDialog.module.css'
+import { useFreshBalances } from './useFreshBalances'
 
 const STEP_TITLES: Record<Step, string> = {
   recipient: 'Who are you sending to?',
@@ -68,6 +69,9 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
   // The recipient the amount step was last filled in for.
   const amountRecipientRef = useRef<string | null>(null)
   const mutation = useCreateTransfer()
+  const [balancesChangedAt, setBalancesChangedAt] = useState<number | null>(null)
+  const balances = useFreshBalances(balancesChangedAt)
+  const waitingForBalances = step === 'amount' && balances.state !== 'ready'
 
   const deposits = depositAccounts(accounts)
   const limit = remainingLimit(customer)
@@ -114,6 +118,7 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
   }
 
   async function goNext(current: 'recipient' | 'amount') {
+    if (current === 'amount' && waitingForBalances) return
     const valid = await form.trigger(STEP_FIELDS[current], { shouldFocus: true })
     if (!valid) return
     if (current === 'recipient') {
@@ -135,9 +140,19 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
     setStep(step === 'review' ? 'amount' : 'recipient')
   }
 
+  /** Back to a blank step 1, as if the dialog had just opened. */
+  function startAnotherTransfer() {
+    mutation.reset()
+    form.reset()
+    amountRecipientRef.current = null
+    setStep('recipient')
+  }
+
   function send(values: TransferFormValues) {
     mutation.mutate(toTransferRequest(values), {
+      onSuccess: () => setBalancesChangedAt(Date.now()),
       onError: (error) => {
+        if (isBalanceChangedError(error)) setBalancesChangedAt(Date.now())
         // Put server field errors under their fields (seen after Back).
         if (error instanceof ApiError && error.fields) {
           for (const [key, message] of Object.entries(error.fields)) {
@@ -201,6 +216,7 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
           transfer={transfer}
           headingRef={headingRef}
           onDone={() => dialogRef.current?.close()}
+          onAnother={startAnotherTransfer}
         />
       ) : (
         <FormProvider {...form}>
@@ -214,7 +230,12 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
 
               {step === 'recipient' && <RecipientStep />}
               {step === 'amount' && (
-                <AmountStep depositAccounts={deposits} remainingLimit={limit} />
+                <AmountStep
+                  depositAccounts={deposits}
+                  remainingLimit={limit}
+                  balances={balances.state}
+                  onRetryBalances={balances.retry}
+                />
               )}
               {step === 'review' && <ReviewStep depositAccounts={deposits} />}
 
@@ -236,7 +257,7 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
                   Back
                 </Button>
               )}
-              <Button type="submit" disabled={isSending}>
+              <Button type="submit" disabled={isSending || waitingForBalances}>
                 {step !== 'review' ? (
                   'Continue'
                 ) : isSending ? (
