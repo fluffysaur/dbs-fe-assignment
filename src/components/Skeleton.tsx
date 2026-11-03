@@ -8,7 +8,6 @@ interface Props {
   className?: string
 }
 
-/** A grey placeholder block. Hidden from screen readers. */
 export function Skeleton({ width = '100%', height = '1em', round, className }: Props) {
   return (
     <span

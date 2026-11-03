@@ -1,8 +1,6 @@
 import type { ApiErrorBody } from './types'
 
 /**
- * Small typed fetch wrapper. Build your query functions on top of this.
- *
  * MSW intercepts these requests in the browser and in tests, so the same
  * `/api/...` paths work locally and in the deployed demo.
  */

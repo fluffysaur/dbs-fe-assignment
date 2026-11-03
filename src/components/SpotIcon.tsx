@@ -9,7 +9,6 @@ interface Props {
   className?: string
 }
 
-/** A decorative icon in a tinted circle, for empty, error and success screens. */
 export function SpotIcon({ icon: Icon, tone = 'muted', size = 48, className }: Props) {
   return (
     <span
