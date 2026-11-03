@@ -17,7 +17,7 @@ src/
     transfer/       The dialog: steps, stepper, success/discard panels, schema.ts (all rules)
     theme/          usePreferences (light/dark + Retail/Premium), the two toggles
   components/       Shared UI: Header, Button, Field, InlineError, Skeleton, EmptyState
-  lib/              format.ts (given), money.ts (money rules: cents, masking, total available, remaining limit), demoParams.ts (demo URL hooks)
+  lib/              format.ts (given, plus account-number masking), money.ts (money rules: cents, total available, remaining limit), demoParams.ts (demo URL hooks)
   test/             MSW + jsdom setup, renderApp helper
 ```
 
@@ -53,6 +53,12 @@ whether the dialog is open, and the discard prompt.
   transactions" list. Server search (`?q=`) would be the next step for a full history page.
 - **Payees are prefetched** when the dashboard loads (`usePrefetchQuery`), so the dialog usually opens
   ready. The step still has its own loading, error + Retry and empty states.
+
+**Shared helpers grouped by what they do.** `lib/` has one file per kind of helper rather than a
+general `utils` file. `format.ts` turns data into display text (`formatMoney`, `formatShortDate`,
+`maskAccountNumber`), so every screen shows it the same way. `money.ts` holds the money rules (cents, total
+available, remaining limit) that the dashboard and the transfer dialog both use, so they can't disagree. A
+helper used by only one feature stays in that feature, e.g. the amount pattern in `transfer/schema.ts`.
 
 **Forms and validation (§3.3, E3).** One React Hook Form instance spans all three steps, so `Back`
 keeps everything with no extra code (T4), even after picking a different recipient on step 1: review
@@ -232,6 +238,12 @@ mostly by the tests and the browser checks, not by the first draft being right:
 - **Removed `Make another transfer`.** I built the wireframe's optional second button on the success
   screen, with step 2 waiting for the refreshed balance and limit so a quick user never saw old numbers.
   It's outside the brief's scope (§2), and I didn't have time to refine it, so I took it out.
+- **Validation limits as constants.** The note's max length and the recipient name's min/max length are
+  constants in `schema.ts`, and their error messages are built from them, so changing a limit updates the
+  rule, the message and the note counter together.
+- **Amount pattern moved into the schema.** `AMOUNT_RE` (at most 2 decimal places) was in `lib/money.ts`,
+  but only the schema uses it. It now sits in `schema.ts` next to the other patterns, so the whole amount
+  rule lives in one place.
 - **Desktop `New transfer` drew over the header.** The desktop styles reset the button's phone
   positioning but not its `z-index: var(--z-header)`, so it tied with the sticky header and won. I found
   this in the browser and reset it to `z-index: auto` on desktop (D8).

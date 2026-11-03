@@ -29,3 +29,8 @@ const shortDate = new Intl.DateTimeFormat('en-SG', {
 export function formatShortDate(iso: string): string {
     return shortDate.format(new Date(iso))
 }
+
+/** `12345678` → `•••• 5678` (same format the API uses for saved payees). */
+export function maskAccountNumber(accountNumber: string): string {
+    return `•••• ${accountNumber.slice(-4)}`
+}
