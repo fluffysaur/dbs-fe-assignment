@@ -2,7 +2,6 @@
 
 - Deployed: [dbs-fe-assignment-tanyijia.vercel.app](https://dbs-fe-assignment-tanyijia.vercel.app/)
 - Run locally: `npm install && npm run dev`
-- Checks: `npm run check` (lint + format + typecheck + tests) and `npm run build`. Both also run in GitHub Actions (`.github/workflows/ci.yml`).
 
 ## Project structure
 
@@ -26,6 +25,9 @@ Code is grouped by feature, so tracing a flow stays inside one folder plus `api/
 `Confirm transfer` to the new balance: `TransferDialog.send` → `useCreateTransfer` (`api/transfers.ts`)
 → `onSuccess` invalidates customer/accounts/transactions → `useDashboardData` refetches → the dashboard
 re-renders behind the success screen.
+
+Feature folders are kept flat because each holds only up to 16 files, and their naming already groups them. If a feature grew to around 20 components, I would split it into
+sub-folders (e.g. `transfer/steps/`, `transfer/panels/`, `transfer/components/`).
 
 Styling uses CSS Modules (one `.module.css` per component) on top of `brief/design-tokens.css`.
 `src/index.css` holds the global base: reset, focus ring, `.amount` (tabular numbers), `.sr-only` and reduced motion.
@@ -83,7 +85,7 @@ step change, focus moves to the step heading so screen readers announce it. On c
 
 **Picking `Send to someone new` scrolls its fields into view.** The fields open below the payee list, so
 with several payees they appear off screen. Without a scroll, the user only finds them by scrolling or by
-pressing `Continue` and hitting an error. The dialog now scrolls just far enough to show all three fields,
+pressing `Continue` and hitting an error. The dialog scrolls just far enough to show all three fields,
 smoothly unless the user prefers reduced motion. It only scrolls when the user picks the option: not when
 it's preselected because there are no saved payees, and not when coming `Back` to the step.
 
@@ -101,7 +103,10 @@ the success screen, so showing both would repeat the same message one screen apa
 
 - An inline script in `index.html` sets `data-theme` (saved choice, else the system setting) and the
   saved `data-segment` before first paint, so a reload never flashes the wrong theme.
-- `usePreferences` takes over from there.
+- `usePreferences` takes over from there. It's called once, in `App`, and passed down, because two
+  segment switches are rendered (header from 640px, under the greeting on phones). If each switch
+  called the hook itself, each would have its own state, and they could show different values after a
+  resize. One level of props was simpler than adding a context provider.
 - Segment = saved choice, else `customer.segment` from the API (the API calls it her default), else retail.
 - Choices are saved only when the user toggles.
 - Components use token variables only; the one literal colour is in the static favicon.
@@ -123,8 +128,9 @@ the review while sending (lower text contrast would break TH3).
 (dialog, radios, select) rather than a component library, since they're accessible by default and
 there's less to explain.
 
-**What I'd change with more time.** Add `Make another transfer` back, with step 2 waiting for the refreshed balance and limit; An end-to-end test against the deployed site; follow live OS theme changes until the user picks one; server-side search for a full
-history view.
+**What I'd change with more time.** Add `Make another transfer` back, with step 2 waiting for the
+refreshed balance and limit; an end-to-end test against the deployed site; follow live OS theme changes
+until the user picks one; server-side search for a full history view.
 
 ## Loading, empty and error states
 
@@ -148,7 +154,8 @@ the dialog refetches when it opens.
 
 `npm test` runs the three tests the brief asks for (E4), plus the starter's `format.test.ts`. They render
 the whole `<App />` against the real MSW handlers and use `user-event`, so they check what a user sees,
-not component internals.
+not component internals. `npm run check` (lint + format + typecheck + tests) and `npm run build` both run
+in GitHub Actions (`.github/workflows/ci.yml`).
 
 | Test                                                                                                                                                                                         | Covers             |
 | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
@@ -209,38 +216,30 @@ mostly by the tests and the browser checks, not by the first draft being right:
 - **An incorrect README claim.** The first draft said `?scenario=error` shows the payee error state in
   the dialog. It doesn't: only the background prefetch fails, and the dialog refetches when it opens.
   The claim was corrected.
-- **Wrong error on the recipient step.** Pressing `Continue` with nobody selected first showed
-  `Choose who to send to.`, then switched to Zod's `Invalid input: expected string, received null`.
-  `Continue` focuses the first radio; when it loses focus, React Hook Form re-checks the field, and a radio
-  group with nothing checked reads as `null`, not `''`. The schema had `payeeId` as `z.string()`, so it
-  rejected the `null` with Zod's default message. Fixed by allowing `null` in the schema and treating it
-  the same as `''`. I found this by trying the flow in the browser.
+- **Wrong error on the recipient step.** With nobody selected, `Choose who to send to.` switched to Zod's
+  `Invalid input: expected string, received null` on blur, because an unchecked radio group reads as
+  `null`, not `''`. Fixed by allowing `null` in the schema and treating it like `''`. I found this in the
+  browser.
 - **Payee error out of sight.** The same error sat below the payee list, so with many payees it was off
   screen after `Continue`. Moved above the list. It is still linked to the list with `aria-describedby`.
 
 **My own fixes and changes after the AI build:**
 
-- **Motion and illustrations** (see Decisions). My idea, scoped down against the brief before
-  building: I dropped a separate "sending" screen, a self-drawing tick and dimming the review step.
-  The payee list's `No saved payees yet.` stays plain text because it sits inside the form.
+- **Motion and illustrations.** My idea, scoped down against the brief before building (see Decisions).
 - **Revealing the new-recipient fields.** I noticed that picking `Send to someone new` gave no sign that
   more fields had opened below the list. The AI build had left this out, so I asked for it to be added.
   Claude laid out the options and I chose scroll-only (see Decisions).
 - **Removed `Make another transfer`.** I built the wireframe's optional second button on the success
   screen, with step 2 waiting for the refreshed balance and limit so a quick user never saw old numbers.
-  It's outside the brief's scope (§2), and I didn't have time to refine it, so I took it out. I also
-  dropped the review step's arrival-time line as repetitive.
-- **Desktop `New transfer` drew over the header.** Scrolling on desktop, the button in the balance card
-  showed on top of the sticky header. The phone styles give it `z-index: var(--z-header)` so it floats
-  above the page, and the desktop styles reset its position but not its z-index. A flex item keeps its
-  z-index even when it isn't positioned, so it tied with the header and won by coming later in the page.
-  I found this in the browser and had the desktop styles reset it to `z-index: auto` (D8). Phones are
-  unchanged: the button sits at the bottom there and can't reach the header.
+  It's outside the brief's scope (§2), and I didn't have time to refine it, so I took it out.
+- **Desktop `New transfer` drew over the header.** The desktop styles reset the button's phone
+  positioning but not its `z-index: var(--z-header)`, so it tied with the sticky header and won. I found
+  this in the browser and reset it to `z-index: auto` on desktop (D8).
 
 ## Not done / known issues
 
-- Not built (optional): `Make another transfer` (out of scope, see AI use), debug menu (URL params instead), balance-hide toggle, third segment, `#transfer`
-  deep link, end-to-end test, the optional date line.
+- Not built (optional): debug menu (URL params instead), balance-hide toggle, third segment,
+  `#transfer` deep link, end-to-end test, the optional date line.
 - The OS theme is read on first load only. Changing it later doesn't update the app unless the user hasn't
   picked one and reloads.
 - If the API's default segment were `premium` and nothing was saved, the page would paint retail first
