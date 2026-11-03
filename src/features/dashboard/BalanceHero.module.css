@@ -44,6 +44,7 @@
 @media (min-width: 640px) {
   .cta {
     position: static;
+    z-index: auto;
     box-shadow: none;
     background: var(--on-hero);
     color: var(--hero-from);

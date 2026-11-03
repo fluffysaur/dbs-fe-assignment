@@ -252,6 +252,12 @@ mostly by the tests and the browser checks, not by the first draft being right:
   and relying on the server's 422. I rejected that: even a tiny window can show a user an avoidable
   error. Claude then proposed disabling the button, and I moved the wait to step 2 instead (see
   Decisions). I also dropped the review step's arrival-time line as repetitive.
+- **Desktop `New transfer` drew over the header.** Scrolling on desktop, the button in the balance card
+  showed on top of the sticky header. The phone styles give it `z-index: var(--z-header)` so it floats
+  above the page, and the desktop styles reset its position but not its z-index. A flex item keeps its
+  z-index even when it isn't positioned, so it tied with the header and won by coming later in the page.
+  I found this in the browser and had the desktop styles reset it to `z-index: auto` (D8). Phones are
+  unchanged: the button sits at the bottom there and can't reach the header.
 
 ## Not done / known issues
 
