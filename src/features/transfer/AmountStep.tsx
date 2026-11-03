@@ -1,29 +1,18 @@
-import { useEffect, useRef } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import type { Account } from '../../api/types'
-import { Button } from '../../components/Button'
 import { Field, fieldProps, inputClassName } from '../../components/Field'
-import { Skeleton } from '../../components/Skeleton'
 import { formatMoney } from '../../lib/format'
 import { NOTE_MAX_LENGTH, type TransferFormValues } from './schema'
 import styles from './TransferDialog.module.css'
-import type { BalancesState } from './useFreshBalances'
 
 const QUICK_AMOUNTS = [50, 100, 250, 500]
 
 interface Props {
   depositAccounts: Account[]
   remainingLimit: number
-  balances: BalancesState
-  onRetryBalances: () => void
 }
 
-export function AmountStep({
-  depositAccounts,
-  remainingLimit,
-  balances,
-  onRetryBalances,
-}: Props) {
+export function AmountStep({ depositAccounts, remainingLimit }: Props) {
   const {
     register,
     control,
@@ -38,22 +27,6 @@ export function AmountStep({
 
   const amountError = errors.amount?.message
   const noteError = errors.note?.message
-
-  // Once fresh numbers arrive, re-check an amount checked against the old ones.
-  const lastBalances = useRef(balances)
-  useEffect(() => {
-    const previous = lastBalances.current
-    lastBalances.current = balances
-    if (
-      previous !== 'ready' &&
-      balances === 'ready' &&
-      getFieldState('amount').isTouched
-    ) {
-      void trigger('amount')
-    }
-  }, [balances, getFieldState, trigger])
-
-  const refreshing = balances === 'refreshing'
 
   return (
     <div className={styles.fields}>
@@ -109,51 +82,16 @@ export function AmountStep({
                 </button>
               ))}
             </div>
-            {balances === 'failed' ? (
-              <div id="amount-help" className={styles.notice}>
-                <p>We couldn&apos;t load your latest balance.</p>
-                <Button variant="ghost" onClick={onRetryBalances}>
-                  Retry
-                </Button>
+            <dl id="amount-help" className={styles.limits}>
+              <div>
+                <dt>Available</dt>
+                <dd className="amount">{account ? formatMoney(account.balance) : '—'}</dd>
               </div>
-            ) : (
-              <dl
-                id="amount-help"
-                className={styles.limits}
-                aria-busy={refreshing || undefined}
-              >
-                <div>
-                  <dt>Available</dt>
-                  <dd className="amount">
-                    {refreshing ? (
-                      <Skeleton
-                        width="6rem"
-                        height="1lh"
-                        className={styles.limitSkeleton}
-                      />
-                    ) : account ? (
-                      formatMoney(account.balance)
-                    ) : (
-                      '—'
-                    )}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Remaining daily limit</dt>
-                  <dd className="amount">
-                    {refreshing ? (
-                      <Skeleton
-                        width="6rem"
-                        height="1lh"
-                        className={styles.limitSkeleton}
-                      />
-                    ) : (
-                      formatMoney(remainingLimit)
-                    )}
-                  </dd>
-                </div>
-              </dl>
-            )}
+              <div>
+                <dt>Remaining daily limit</dt>
+                <dd className="amount">{formatMoney(remainingLimit)}</dd>
+              </div>
+            </dl>
           </>
         }
       >

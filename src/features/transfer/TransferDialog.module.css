@@ -285,10 +285,6 @@
   text-align: right;
 }
 
-.limitSkeleton {
-  margin-left: auto;
-}
-
 /* Review step */
 .summary {
   display: grid;

@@ -93,27 +93,6 @@ it's preselected because there are no saved payees, and not when coming `Back` t
 - **Layout kept.** I didn't move `Send to someone new` to the top. Saved payees stay first, as in the
   wireframe.
 
-**`Make another transfer`, and step 2 waits for fresh balances (T3, T5).** The wireframe's optional
-second button on the success screen, added below `Back to dashboard`, which stays the primary button as
-in T5. It resets the dialog in place to a blank step 1, the same as opening it fresh, and focus moves to
-the step heading.
-
-- **Step 2 waits for the new numbers.** After a transfer, the balance and limit refetch in the
-  background. Someone quick could reach step 2 while it still shows the old, higher numbers, pass the
-  client check, and only be stopped by a 422 on Confirm. So until both have reloaded, the two values
-  show skeletons (`aria-busy`) and `Continue` is disabled. The same happens after a 422 on review, which
-  also refreshes them.
-- **Only refreshes caused by a transfer count.** The dialog notes when a transfer (or a 422) made the
-  numbers out of date and waits for data newer than that. A routine refetch, such as on window focus,
-  doesn't flash the skeleton.
-- **An amount typed during the wait is re-checked** when the new numbers land, so an over-balance error
-  shows without another keystroke.
-- **If the refresh fails**, the values are replaced with `We couldn't load your latest balance.` +
-  `Retry` (my wording; the brief has none), and `Continue` stays disabled.
-- **Why block on step 2, not on the button.** The wait sits where the numbers are used, and the success
-  screen keeps two plain buttons. Step 1 usually takes longer than the refetch, so most people never
-  see it.
-
 **No arrival-time line on review.** The wireframe shows `i Usually arrives in minutes.` on the review
 step. The brief doesn't ask for it there (T4), and it fixes `The money should arrive within minutes.` for
 the success screen, so showing both would repeat the same message one screen apart. It's on success only.
@@ -160,7 +139,6 @@ On the deployed site, add these to the page URL. `lib/demoParams.ts` forwards th
 | Field errors      | e.g. amount `5000` from checking, or account number `123`            | Message under the field; Continue focuses it                                                                                                                                                 |
 | Send failure      | put `#fail` in the transfer note                                     | Alert on the review step; data kept; Confirm works again                                                                                                                                     |
 | Payee loading     | `?delay=3000`, then open the dialog as soon as the dashboard appears | Skeleton rows in step 1                                                                                                                                                                      |
-| Fresh balances    | `?delay=3000`, send a transfer, then quickly `Make another transfer` | Step 2 shows skeletons for the balance and limit, with `Continue` disabled, until they reload                                                                                                |
 
 The payee error state (`We couldn't load your saved payees.` + Retry, with `Send to someone new` still
 usable) isn't reachable from the URL. The one-off `?scenario=error` hits the background prefetch, and
@@ -179,7 +157,7 @@ not component internals.
 | Dashboard 500 (one-off `server.use`) → error → `Retry` → loaded                                                                                                                              | E4.3               |
 
 I kept to the three the brief asks for. Edge cases (exact balance vs +0.01, send
-failure, `Make another transfer` waiting for fresh balances) were checked by hand in the browser with the demo hooks above. Unit tests for the schema and a
+failure) were checked by hand in the browser with the demo hooks above. Unit tests for the schema and a
 send-failure test would be the next to add.
 
 Test notes:
@@ -248,10 +226,12 @@ mostly by the tests and the browser checks, not by the first draft being right:
 - **Revealing the new-recipient fields.** I noticed that picking `Send to someone new` gave no sign that
   more fields had opened below the list. The AI build had left this out, so I asked for it to be added.
   Claude laid out the options and I chose scroll-only (see Decisions).
-- **Waiting for fresh balances on step 2.** Claude first suggested not blocking `Make another transfer`
-  and relying on the server's 422. I rejected that: even a tiny window can show a user an avoidable
-  error. Claude then proposed disabling the button, and I moved the wait to step 2 instead (see
-  Decisions). I also dropped the review step's arrival-time line as repetitive.
+- **Cut `Make another transfer`.** I first built the wireframe's optional second button on the success
+  screen. To stop a quick user reaching step 2 with the old balance, step 2 then had to wait for the
+  refreshed numbers, with its own skeletons, retry and re-check. That was a lot of code for an optional
+  button, so I removed both. Closing the dialog returns to the dashboard, which has refetched, and the
+  server's 422 still catches anything stale. I also dropped the review step's arrival-time line as
+  repetitive.
 - **Desktop `New transfer` drew over the header.** Scrolling on desktop, the button in the balance card
   showed on top of the sticky header. The phone styles give it `z-index: var(--z-header)` so it floats
   above the page, and the desktop styles reset its position but not its z-index. A flex item keeps its
@@ -261,7 +241,7 @@ mostly by the tests and the browser checks, not by the first draft being right:
 
 ## Not done / known issues
 
-- Not built (optional): debug menu (URL params instead), balance-hide toggle, third segment, `#transfer`
+- Not built (optional): `Make another transfer` (see AI use), debug menu (URL params instead), balance-hide toggle, third segment, `#transfer`
   deep link, end-to-end test, the optional date line.
 - The OS theme is read on first load only. Changing it later doesn't update the app unless the user hasn't
   picked one and reloads.
