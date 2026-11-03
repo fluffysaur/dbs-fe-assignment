@@ -7,9 +7,9 @@ import txnStyles from './TransactionList.module.css'
 
 /**
  * Same layout and sizes as the loaded dashboard (it reuses the real CSS
- * classes), so nothing jumps when the data arrives (D1).
+ * classes), so nothing jumps when the data arrives (D1). Placeholder heights
+ * match each text style's line height (font size × 1.5).
  */
-// Placeholder heights match each text style's line height (font size × 1.5).
 export function DashboardSkeleton() {
   return (
     <div className={dashboard.layout} aria-busy="true">

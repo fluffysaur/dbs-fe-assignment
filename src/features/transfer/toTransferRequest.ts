@@ -2,7 +2,6 @@ import type { CreateTransferRequest } from '../../api/types'
 import { toCents } from '../../lib/money'
 import { NEW_RECIPIENT, type TransferFormValues } from './schema'
 
-/** Turns validated form values into the POST /api/transfers body. */
 export function toTransferRequest(values: TransferFormValues): CreateTransferRequest {
   const note = values.note.trim()
   const base = {

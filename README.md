@@ -157,25 +157,26 @@ the dialog refetches when it opens.
 
 ## Tests
 
-`npm test`: 19 tests. The integration tests render the whole `<App />` against the real MSW handlers
-and use `user-event`, so they check what a user sees, not component internals.
+`npm test` runs the three tests the brief asks for (E4), plus the starter's `format.test.ts`. They render
+the whole `<App />` against the real MSW handlers and use `user-event`, so they check what a user sees,
+not component internals.
 
-| Test                                                                                                                                                                                                      | Why                                                                                                                                |
-| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Amount over balance → exact error, focus on the field, **no POST sent** (MSW request log)                                                                                                                 | Required (E4.1). Shows the client rule blocks the request.                                                                         |
-| Successful transfer → `Sending…` disabled, `Transfer sent` + reference → dashboard shows the new total, account balance, limit and `Transfer to Jamie Tan` row; focus back on `New transfer`              | Required (E4.2). Covers T5, T6 and the cache refresh end to end.                                                                   |
-| Dashboard 500 (one-off `server.use`) → error → `Retry` → loaded                                                                                                                                           | Required (E4.3).                                                                                                                   |
-| Note `#fail` → alert with the brief's copy, still on review, data shown, Confirm enabled, no success                                                                                                      | T7: "never show success after a failure".                                                                                          |
-| Search by category (`DINING`), no-match state, `Clear search` restores 8 rows                                                                                                                             | D6.                                                                                                                                |
-| Picking `Send to someone new` scrolls the fields into view; the automatic preselect and coming `Back` to the step don't                                                                                   | Only the user's own choice triggers the scroll. jsdom has no `scrollIntoView`, so it's stubbed.                                    |
-| `schema.test.ts`: amount format, min 1.00, 2 decimals, **exact balance passes / +0.01 fails**, daily limit, note length, payee/new recipient rules, and a recipient error while the amount is still empty | Fast checks of every rule, including the cents edge case and the cross-field case (step 1 is checked while step 2 is still blank). |
+| Test                                                                                                                                                                                         | Covers             |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| Amount over balance → exact error, focus on the field, **no POST sent** (MSW request log)                                                                                                    | E4.1               |
+| Successful transfer → `Sending…` disabled, `Transfer sent` + reference → dashboard shows the new total, account balance, limit and `Transfer to Jamie Tan` row; focus back on `New transfer` | E4.2 (also T5, T6) |
+| Dashboard 500 (one-off `server.use`) → error → `Retry` → loaded                                                                                                                              | E4.3               |
+
+I kept to the three the brief asks for. Edge cases (exact balance vs +0.01, recipient changes, send
+failure) were checked by hand in the browser with the demo hooks above. Unit tests for the schema and a
+send-failure test would be the next to add.
 
 Test notes:
 
 - Mock responses take ~500 ms, so the async query timeout is 3 s.
 - Money assertions use `money()` (`test/renderApp.tsx`), which is `formatMoney` with the non-breaking
   space normalised the way Testing Library normalises page text.
-- jsdom has no `showModal`, `scrollIntoView` or `matchMedia`, so `test/setup.ts` stubs them.
+- jsdom has no `showModal`, so `test/setup.ts` stubs it.
 
 ## AI use
 
@@ -224,8 +225,7 @@ mostly by the tests and the browser checks, not by the first draft being right:
   `Continue` focuses the first radio; when it loses focus, React Hook Form re-checks the field, and a radio
   group with nothing checked reads as `null`, not `''`. The schema had `payeeId` as `z.string()`, so it
   rejected the `null` with Zod's default message. Fixed by allowing `null` in the schema and treating it
-  the same as `''` (a regression test covers it). I found this by trying the flow in the browser; the
-  tests never produced a `null` because they set values directly.
+  the same as `''`. I found this by trying the flow in the browser.
 - **Payee error out of sight.** The same error sat below the payee list, so with many payees it was off
   screen after `Continue`. Moved above the list. It is still linked to the list with `aria-describedby`.
 

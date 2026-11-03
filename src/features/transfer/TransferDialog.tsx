@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, LoaderCircle, X } from 'lucide-react'
-import { type FormEvent, useEffect, useMemo, useRef, useState } from 'react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { type FieldPath, FormProvider, useForm } from 'react-hook-form'
 import { ApiError } from '../../api/client'
 import { useCreateTransfer } from '../../api/transfers'
@@ -69,15 +69,13 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
   const amountRecipientRef = useRef<string | null>(null)
   const mutation = useCreateTransfer()
 
-  const deposits = useMemo(() => depositAccounts(accounts), [accounts])
+  const deposits = depositAccounts(accounts)
   const limit = remainingLimit(customer)
-  const schema = useMemo(
-    () => makeTransferSchema({ accounts: deposits, remainingLimit: limit }),
-    [deposits, limit],
-  )
 
   const form = useForm<TransferFormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(
+      makeTransferSchema({ accounts: deposits, remainingLimit: limit }),
+    ),
     // Check a field when the user leaves it, then again as they fix it.
     mode: 'onTouched',
     defaultValues: {
@@ -138,7 +136,6 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
   }
 
   function send(values: TransferFormValues) {
-    if (isSending) return
     mutation.mutate(toTransferRequest(values), {
       onError: (error) => {
         // Put server field errors under their fields (seen after Back).

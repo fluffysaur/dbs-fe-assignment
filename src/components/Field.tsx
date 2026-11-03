@@ -15,7 +15,6 @@ interface Props {
   children: ReactNode
 }
 
-/** Label + control + error message + optional help text. */
 export function Field({ id, label, error, aside, footer, children }: Props) {
   return (
     <div className={styles.field}>

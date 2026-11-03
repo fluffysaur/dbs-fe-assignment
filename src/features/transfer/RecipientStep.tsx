@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { payeesQuery } from '../../api/queries'
 import { Button } from '../../components/Button'
-import { Field, fieldProps, inputClassName } from '../../components/Field'
+import { errorId, Field, fieldProps, inputClassName } from '../../components/Field'
 import { InlineError } from '../../components/InlineError'
 import { Skeleton } from '../../components/Skeleton'
 import { BANKS, NEW_RECIPIENT, type TransferFormValues } from './schema'
@@ -75,11 +75,11 @@ export function RecipientStep() {
         </div>
       )}
 
-      <InlineError id="payeeId-error" message={payeeError} />
+      <InlineError id={errorId('payeeId')} message={payeeError} />
 
       <fieldset
         className={styles.payees}
-        aria-describedby={payeeError ? 'payeeId-error' : undefined}
+        aria-describedby={payeeError ? errorId('payeeId') : undefined}
       >
         <legend className="sr-only">Recipient</legend>
 
