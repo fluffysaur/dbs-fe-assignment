@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowLeft, LoaderCircle, X } from 'lucide-react'
-import { type FormEvent, useEffect, useRef, useState } from 'react'
+import { type SubmitEvent, useEffect, useRef, useState } from 'react'
 import { type FieldPath, FormProvider, useForm } from 'react-hook-form'
 import { ApiError } from '../../api/client'
 import { isBalanceChangedError, useCreateTransfer } from '../../api/transfers'
@@ -139,7 +139,7 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
     })
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: SubmitEvent<HTMLFormElement>) {
     event.preventDefault()
     if (step === 'review') {
       // Final check with the same schema before sending.
