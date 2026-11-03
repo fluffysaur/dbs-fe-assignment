@@ -12,6 +12,11 @@ export function createTransfer(body: CreateTransferRequest) {
   })
 }
 
+/** 422 = balance or limit changed since we loaded them. */
+export function isBalanceChangedError(error: Error) {
+  return error instanceof ApiError && error.status === 422
+}
+
 /** Balances and the daily limit (the customer holds `transferredToday`). */
 function refreshBalances(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: customerQuery.queryKey })
@@ -33,9 +38,8 @@ export function useCreateTransfer() {
       void queryClient.invalidateQueries({ queryKey: recentTransactionsQuery.queryKey })
     },
     onError: (error) => {
-      // 422 = balance or limit changed since we loaded them; refresh so the
-      // form's own rules use the new numbers.
-      if (error instanceof ApiError && error.status === 422) refreshBalances(queryClient)
+      // Refresh so the form's own rules use the new numbers.
+      if (isBalanceChangedError(error)) refreshBalances(queryClient)
     },
   })
 }

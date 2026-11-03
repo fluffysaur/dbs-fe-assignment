@@ -285,6 +285,10 @@
   text-align: right;
 }
 
+.limitSkeleton {
+  margin-left: auto;
+}
+
 /* Review step */
 .summary {
   display: grid;
@@ -314,6 +318,19 @@
   gap: var(--space-3);
   padding: var(--space-10) var(--space-6);
   text-align: center;
+}
+
+/* Stacked, both as wide as the wider label; full width on phones. */
+.successActions {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+@media (max-width: 639px) {
+  .successActions {
+    justify-self: stretch;
+  }
 }
 
 .successIcon {

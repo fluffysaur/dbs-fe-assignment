@@ -219,6 +219,126 @@ describe('transfer', () => {
   })
 })
 
+describe('make another transfer', () => {
+  /** Sends `amount` from checking to Jamie Tan and waits for success. */
+  async function sendToJamie(user: UserEvent, amount: string) {
+    const dialog = await startTransferToJamie(user)
+    await user.type(within(dialog).getByRole('textbox', { name: 'Amount' }), amount)
+    await user.click(within(dialog).getByRole('button', { name: 'Continue' }))
+    await user.click(
+      await within(dialog).findByRole('button', { name: 'Confirm transfer' }),
+    )
+    await within(dialog).findByRole('heading', { name: 'Transfer sent' })
+    return dialog
+  }
+
+  /** Lets the first accounts request through, then holds the refresh until released. */
+  function holdAccountsRefresh() {
+    let release = () => {}
+    const released = new Promise<void>((resolve) => (release = resolve))
+    let calls = 0
+    server.use(
+      http.get('*/api/accounts', async () => {
+        calls += 1
+        if (calls > 1) await released
+        // Returning nothing falls through to the real mock handler.
+      }),
+    )
+    return release
+  }
+
+  async function startAnother(user: UserEvent, dialog: HTMLElement) {
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Make another transfer' }),
+    )
+    expect(
+      await within(dialog).findByRole('heading', { name: 'Who are you sending to?' }),
+    ).toHaveFocus()
+  }
+
+  it('starts blank and waits for fresh balances before Continue', async () => {
+    const release = holdAccountsRefresh()
+    const { user } = renderApp()
+    const dialog = await sendToJamie(user, '120')
+
+    await startAnother(user, dialog)
+    expect(within(dialog).getByRole('radio', { name: /Jamie Tan/ })).not.toBeChecked()
+    await user.click(within(dialog).getByRole('radio', { name: /Marcus Lee/ }))
+    await continueToAmount(user, dialog)
+
+    expect(within(dialog).getByRole('textbox', { name: 'Amount' })).toHaveValue('')
+    expect(within(dialog).getByRole('button', { name: 'Continue' })).toBeDisabled()
+    expect(within(dialog).queryByText(money(4280.55))).not.toBeInTheDocument()
+
+    release()
+    // 4,280.55 - 120 on checking; the limit was already 5,000 - 120.
+    expect(await within(dialog).findByText(money(4160.55))).toBeInTheDocument()
+    expect(within(dialog).getByText(money(4880))).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: 'Continue' })).toBeEnabled()
+
+    await user.type(within(dialog).getByRole('textbox', { name: 'Amount' }), '50')
+    await user.click(within(dialog).getByRole('button', { name: 'Continue' }))
+    await user.click(
+      await within(dialog).findByRole('button', { name: 'Confirm transfer' }),
+    )
+    expect(
+      await within(dialog).findByRole('heading', { name: 'Transfer sent' }),
+    ).toBeInTheDocument()
+    expect(within(dialog).getByText(money(50))).toBeInTheDocument()
+  })
+
+  it('re-checks an amount typed before the fresh balance arrived', async () => {
+    const release = holdAccountsRefresh()
+    const { user } = renderApp()
+    const dialog = await sendToJamie(user, '4000')
+
+    await startAnother(user, dialog)
+    await user.click(within(dialog).getByRole('radio', { name: /Jamie Tan/ }))
+    await continueToAmount(user, dialog)
+    // Fine against the old 4,280.55, too much for the new 280.55.
+    await user.type(within(dialog).getByRole('textbox', { name: 'Amount' }), '1000')
+    await user.tab()
+    expect(within(dialog).queryByText(/available balance/)).not.toBeInTheDocument()
+
+    release()
+    expect(
+      await within(dialog).findByText(
+        `Amount can't be more than your available balance (${money(280.55)}).`,
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('shows Retry when the balances fail to refresh', async () => {
+    let calls = 0
+    server.use(
+      http.get('*/api/accounts', () => {
+        calls += 1
+        if (calls === 2) {
+          return HttpResponse.json(
+            { error: { code: 'INTERNAL_ERROR', message: 'Down' } },
+            { status: 500 },
+          )
+        }
+      }),
+    )
+    const { user } = renderApp()
+    const dialog = await sendToJamie(user, '120')
+
+    await startAnother(user, dialog)
+    await user.click(within(dialog).getByRole('radio', { name: /Jamie Tan/ }))
+    await continueToAmount(user, dialog)
+
+    expect(
+      await within(dialog).findByText("We couldn't load your latest balance."),
+    ).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: 'Continue' })).toBeDisabled()
+
+    await user.click(within(dialog).getByRole('button', { name: 'Retry' }))
+    expect(await within(dialog).findByText(money(4160.55))).toBeInTheDocument()
+    expect(within(dialog).getByRole('button', { name: 'Continue' })).toBeEnabled()
+  })
+})
+
 describe('send to someone new', () => {
   afterEach(() => vi.restoreAllMocks())
 
