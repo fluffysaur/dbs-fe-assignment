@@ -3,12 +3,16 @@ import { Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { payeesQuery } from '../../api/queries'
+import { Avatar } from '../../components/Avatar'
 import { Button } from '../../components/Button'
-import { errorId, Field, fieldProps, inputClassName } from '../../components/Field'
+import { errorId, Field } from '../../components/Field'
 import { InlineError } from '../../components/InlineError'
+import { SearchInput } from '../../components/SearchInput'
 import { Skeleton } from '../../components/Skeleton'
+import { SpotIcon } from '../../components/SpotIcon'
 import { BANKS, NEW_RECIPIENT, type TransferFormValues } from './schema'
-import styles from './TransferDialog.module.css'
+import shared from './TransferDialog.module.css'
+import styles from './RecipientStep.module.css'
 
 export function RecipientStep() {
     const {
@@ -59,20 +63,12 @@ export function RecipientStep() {
     return (
         <>
             {payees.data && payees.data.length > 0 && (
-                <div>
-                    <label htmlFor="payee-search" className="sr-only">
-                        Search payees
-                    </label>
-                    <input
-                        id="payee-search"
-                        type="search"
-                        className={inputClassName}
-                        placeholder="Search payees"
-                        autoComplete="off"
-                        value={search}
-                        onChange={(event) => setSearch(event.target.value)}
-                    />
-                </div>
+                <SearchInput
+                    id="payee-search"
+                    label="Search payees"
+                    value={search}
+                    onChange={setSearch}
+                />
             )}
 
             <InlineError id={errorId('payeeId')} message={payeeError} />
@@ -114,9 +110,7 @@ export function RecipientStep() {
                 {visiblePayees.map((payee) => (
                     <label key={payee.id} className={styles.payee}>
                         <input type="radio" value={payee.id} {...payeeField} />
-                        <span className={styles.initials} aria-hidden>
-                            {payee.initials}
-                        </span>
+                        <Avatar initials={payee.initials} />
                         <span className={styles.payeeText}>
                             <span className={styles.payeeName}>{payee.name}</span>
                             <span className={`amount ${styles.payeeMeta}`}>
@@ -136,66 +130,56 @@ export function RecipientStep() {
                             return payeeField.onChange(event)
                         }}
                     />
-                    <span className={styles.initials} aria-hidden>
-                        <Plus size={18} />
-                    </span>
+                    <SpotIcon icon={Plus} size={40} />
                     <span className={styles.payeeName}>Send to someone new</span>
                 </label>
             </fieldset>
 
             {payeeId === NEW_RECIPIENT && (
-                <div ref={fieldsRef} className={styles.fields}>
+                <div ref={fieldsRef} className={shared.fields}>
                     <Field
                         id="recipient-name"
                         label="Recipient name"
                         error={recipientErrors?.name?.message}
                     >
-                        <input
-                            className={inputClassName}
-                            autoComplete="off"
-                            {...fieldProps(
-                                'recipient-name',
-                                recipientErrors?.name?.message,
-                            )}
-                            {...register('recipient.name')}
-                        />
+                        {(control) => (
+                            <input
+                                {...control}
+                                autoComplete="off"
+                                {...register('recipient.name')}
+                            />
+                        )}
                     </Field>
                     <Field
                         id="recipient-account"
                         label="Account number (8 digits)"
                         error={recipientErrors?.accountNumber?.message}
                     >
-                        <input
-                            className={`amount ${inputClassName}`}
-                            inputMode="numeric"
-                            autoComplete="off"
-                            {...fieldProps(
-                                'recipient-account',
-                                recipientErrors?.accountNumber?.message,
-                            )}
-                            {...register('recipient.accountNumber')}
-                        />
+                        {(control) => (
+                            <input
+                                {...control}
+                                className={`amount ${control.className}`}
+                                inputMode="numeric"
+                                autoComplete="off"
+                                {...register('recipient.accountNumber')}
+                            />
+                        )}
                     </Field>
                     <Field
                         id="recipient-bank"
                         label="Bank"
                         error={recipientErrors?.bank?.message}
                     >
-                        <select
-                            className={inputClassName}
-                            {...fieldProps(
-                                'recipient-bank',
-                                recipientErrors?.bank?.message,
-                            )}
-                            {...register('recipient.bank')}
-                        >
-                            <option value="">Choose a bank</option>
-                            {BANKS.map((bank) => (
-                                <option key={bank} value={bank}>
-                                    {bank}
-                                </option>
-                            ))}
-                        </select>
+                        {(control) => (
+                            <select {...control} {...register('recipient.bank')}>
+                                <option value="">Choose a bank</option>
+                                {BANKS.map((bank) => (
+                                    <option key={bank} value={bank}>
+                                        {bank}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </Field>
                 </div>
             )}

@@ -1,0 +1,54 @@
+.payees {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.payee {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 60px;
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+}
+
+.payee:hover {
+    background: var(--surface-muted);
+}
+
+.payee:has(input:checked) {
+    border-color: var(--brand);
+    background: var(--brand-soft);
+}
+
+.payee input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--brand);
+}
+
+.payeeText {
+    display: grid;
+}
+
+.payeeName {
+    font-weight: var(--weight-medium);
+}
+
+.payeeMeta {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+}
+
+.notice {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--text-muted);
+}

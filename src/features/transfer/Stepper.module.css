@@ -1,0 +1,45 @@
+/* Recipient → Amount → Review */
+.stepper {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    list-style: none;
+}
+
+.stepper li {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.stepper li + li::before {
+    content: '→' / '';
+    color: var(--text-muted);
+}
+
+.stepper li[aria-current='step'] {
+    color: var(--text);
+    font-weight: var(--weight-semibold);
+}
+
+.stepNumber {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    font-size: var(--text-xs);
+}
+
+.stepper li[aria-current='step'] .stepNumber,
+.stepper li[data-done] .stepNumber {
+    border-color: var(--brand);
+    background: var(--brand);
+    color: var(--on-brand);
+}

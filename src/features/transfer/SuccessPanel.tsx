@@ -4,7 +4,8 @@ import type { Transfer } from '../../api/types'
 import { Button } from '../../components/Button'
 import { SpotIcon } from '../../components/SpotIcon'
 import { formatMoney } from '../../lib/format'
-import styles from './TransferDialog.module.css'
+import shared from './TransferDialog.module.css'
+import styles from './Panels.module.css'
 
 interface Props {
     transfer: Transfer
@@ -16,14 +17,14 @@ interface Props {
 export function SuccessPanel({ transfer, headingRef, onDone }: Props) {
     const { recipient } = transfer
     return (
-        <div className={styles.success}>
+        <div className={styles.panel}>
             <SpotIcon
                 icon={Check}
                 tone="positive"
                 size={64}
                 className={styles.successIcon}
             />
-            <h3 ref={headingRef} tabIndex={-1} className={styles.stepTitle}>
+            <h3 ref={headingRef} tabIndex={-1} className={shared.stepTitle}>
                 Transfer sent
             </h3>
             <p className={`amount ${styles.successAmount}`}>
@@ -37,7 +38,7 @@ export function SuccessPanel({ transfer, headingRef, onDone }: Props) {
                 <dt>Reference</dt>
                 <dd className="amount">{transfer.reference}</dd>
             </dl>
-            <p className={styles.hint}>The money should arrive within minutes.</p>
+            <p className={shared.hint}>The money should arrive within minutes.</p>
             <div className={styles.successActions}>
                 <Button onClick={onDone}>Back to dashboard</Button>
             </div>

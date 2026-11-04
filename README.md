@@ -16,7 +16,8 @@ src/
     dashboard/      The page: data hook, skeleton, error, hero, accounts, transactions, daily limit
     transfer/       The dialog: steps, stepper, success/discard panels, schema.ts (all rules)
     theme/          usePreferences (light/dark + Retail/Premium), the two toggles
-  components/       Shared UI: Header, Button, Field, InlineError, Skeleton, EmptyState, SpotIcon
+    header/         The top bar: brand, nav links, theme controls, avatar
+  components/       Shared UI, no data: Button, Field, SearchInput, Avatar, InlineError, Skeleton, EmptyState, SpotIcon
   lib/              format.ts (display text), money.ts (money rules), demoParams.ts (demo URL hooks)
   mocks/            MSW browser worker over the given mock-api handlers
   test/             MSW + jsdom setup, renderApp helper
@@ -34,14 +35,16 @@ Form + Zod, the copy, the breakpoints) isn't repeated here.
 
 #### Feature folders
 
-- **Decision:** files for one feature sit together (`dashboard/`, `transfer/`, `theme/`), with their
+- **Decision:** files for one feature sit together (`dashboard/`, `transfer/`, `theme/`, `header/`), with their
   CSS Modules and tests. Shared code lives in `components/`, `lib/` and `api/`.
 - **Trade-off:** a flow that crosses features, such as a transfer refreshing the dashboard, connects
   through `api/` query keys rather than direct imports, so it isn't visible from one folder.
-- **Justification:** changing a feature mostly touches one folder. The transfer refresh is the only
-  cross-feature link, and going through query keys means neither feature imports the other. The same
-  idea scales up to micro-frontends, where each feature becomes its own separately deployed app;
-  keeping features self-contained keeps that option open.
+- **Justification:** changing a feature mostly touches one folder. Features import each other only to
+  render one another's components: the dashboard opens `TransferDialog` and shows the segment switch,
+  and the header shows the theme toggles. Data never passes through those imports; the transfer
+  refreshes the dashboard through query keys, so neither feature reaches into the other's state. The
+  same idea scales up to micro-frontends, where each feature becomes its own separately deployed app;
+  keeping data flowing through `api/` keeps that option open.
 
 #### Flat feature folders
 
@@ -65,10 +68,36 @@ Form + Zod, the copy, the breakpoints) isn't repeated here.
   and the dashboard and the dialog can't disagree on money rules. Moving a helper happens once, when
   the need is real, and until then `lib/` holds only code that's truly shared.
 
+#### Shared components: only with two uses today
+
+- **Decision:** a component goes in `components/` when two places use it today and sharing it
+  removes a way to get something wrong. `components/` holds only pieces that take no data and don't
+  import from `features/`, so `Header`, which loads the customer and holds the theme toggles, lives
+  in `features/header/`.
+  - `Field` renders the label and error, and hands its control the `id`, class, `aria-invalid` and
+    `aria-describedby`, so the label, error and help text can't point at different ids.
+  - `SearchInput` is the one search box, used for transactions and payees, so both look and read the
+    same. Each feature keeps its own filter, because the rules differ (D6, T2).
+  - `Avatar` is the initials circle in the header and on payee rows.
+- **Not shared on purpose:** the search filtering (different fields per requirement), the
+  `filter(Boolean).join(' ')` class idiom (a helper wouldn't make three lines clearer), muted small
+  text (two token lines), icon-only buttons (✕ and the theme toggle look different), and a general
+  dialog or card component (there's one dialog, and the card is a shared class). The brief's
+  suggested `PayeeOption`, `AccountCard`, `AmountField` and `ReviewSummary` would each be used once,
+  so they stay inline.
+- **Trade-off:** small repeats stay, e.g. both search filters trim and lowercase the query. `Field`
+  takes a function as its child, which is less common than plain children.
+- **Justification:** every shared piece has a reason that exists today. Sharing for imagined future
+  screens adds props and indirection before anyone needs them, and extracting later, when a second
+  use appears, is a small change.
+
 #### CSS Modules on the brief's tokens
 
-- **Decision:** one `.module.css` per component, every value a `var(--token)`. `src/index.css` holds
-  the global base: reset, focus ring, `.amount` (tabular numbers), `.sr-only` and reduced motion.
+- **Decision:** one `.module.css` per component, every value a `var(--token)`. Classes that several
+  components in a feature use sit in the feature's main stylesheet: the section card in
+  `Dashboard.module.css`; the step title, hint and key/value rows in `TransferDialog.module.css`.
+  `src/index.css` holds the global base: reset, focus ring, `.amount` (tabular numbers), `.sr-only`
+  and reduced motion.
 - **Trade-off:** more files and class names than utility classes (e.g. Tailwind).
 - **Justification:** class names can't clash, styles sit next to their component, and states such as
   `[data-over]`, media queries and keyframes read as plain CSS. Vite supports CSS Modules with no
@@ -76,6 +105,16 @@ Form + Zod, the copy, the breakpoints) isn't repeated here.
   would also work, but it's a new dependency, and each token would need mapping into its theme
   (a second list of names to keep in sync with `design-tokens.css`) or long classes like
   `bg-[var(--surface)]`.
+
+#### Copy written inline
+
+- **Decision:** UI text sits in the components, exactly as in §4, and validation messages live with
+  their rules in `transfer/schema.ts`. Not chosen: an i18n library or a central copy file.
+- **Trade-off:** a second language would mean collecting the strings first.
+- **Justification:** translations are out of scope (§2). Inline text can be checked against §4 by
+  reading the component, and the tests type the §4 strings, so a typo can't hide behind a shared
+  constant. With a second language I'd add an i18n library and move strings into message files.
+  Money and date formatting already set their `en-SG` locale in one place (`lib/format.ts`).
 
 ### Server data
 
@@ -437,6 +476,8 @@ Test notes:
 - Building, then removing, `Make another transfer`. It's only in the wireframe, not the brief's
   scope (§2), and I didn't have time to refine it.
 - Formatting and CI setup.
+- A reuse pass: `Field` wiring, `SearchInput`, `Avatar`, `Header` moved out of `components/`, and the
+  transfer styles split per component.
 
 ## Not done / known issues
 
