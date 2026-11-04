@@ -39,7 +39,7 @@ Form + Zod, the copy, the breakpoints) isn't repeated here.
   with their CSS Modules and tests. Shared code lives in `components/`, `lib/` and `api/`.
 - **Trade-off:** a flow that crosses features, such as a transfer refreshing the dashboard, connects
   through `api/` query keys rather than direct imports, so it isn't visible from one folder.
-- **Justification:** changing a feature mostly touches one folder. Features import each other only to
+- **Justification:** changing a feature mostly touches one folder for easier maintenance. Features import each other only to
   render one another's components (the dashboard opens `TransferDialog`); data never passes through
   those imports, so neither feature reaches into the other's state.
 
@@ -47,40 +47,41 @@ Form + Zod, the copy, the breakpoints) isn't repeated here.
 
 - **Decision:** no sub-folders inside a feature. The largest holds 16 files, and their names already
   group them (`*Step`, `*Panel`).
-- **Trade-off:** a long folder listing.
+- **Trade-off:** a longer folder listing.
 - **Justification:** sub-folders of two or three files would add import depth without making
   anything easier to find. At around 20 components I'd split them (e.g. `transfer/steps/`,
   `transfer/panels/`).
 
 #### Shared code only when it's shared today
 
-- **Decision:** `lib/` has one file per kind of helper instead of a `utils` file: `format.ts` turns
-  data into display text, `money.ts` holds the money rules (cents, total, remaining limit). A
-  component goes in `components/` only when two places use it today: `Field` (wires label, error and
-  `aria-*` ids so they can't disagree), `SearchInput` (transactions and payees), `Avatar` (header and
-  payee rows). `components/` takes no data, so `Header`, which loads the customer, lives in
-  `features/header/`.
-- **Not shared on purpose:** the search filtering (different fields per requirement), the
-  `filter(Boolean).join(' ')` class idiom (a helper wouldn't make three lines clearer), muted small
-  text (two token lines), icon-only buttons (✕ and the theme toggle look different), and a general
-  dialog or card component (there's one dialog, and the card is a shared class). The brief's
-  suggested `PayeeOption`, `AccountCard`, `AmountField` and `ReviewSummary` would each be used once,
-  so they stay inline.
-- **Trade-off:** small repeats stay, e.g. both search filters trim and lowercase the query. `Field`
-  takes a function as its child, which is less common than plain children.
-- **Justification:** a file's name tells you where a helper lives, where a single `utils` file tends
-  to grow into a grab bag nobody owns. The dashboard and dialog can't disagree on money rules.
-  Extracting for imagined screens adds props before anyone needs them; extracting when a second use
-  appears is a small change.
+- **Decision:** code is shared only when two places use it today. `lib/` has one file per kind of
+  helper instead of a `utils` file: `format.ts` (display text) and `money.ts` (money rules).
+  `components/` holds `Field`, `SearchInput` and `Avatar`, and nothing that loads data, so `Header`
+  lives in `features/header/`.
+- **Not shared on purpose:**
+  - **The search filters.** Transactions match description or category (D6); payees match name or
+    bank. Sharing them would need a generic helper that takes the fields to search, which is longer
+    and harder to read than the three lines it replaces. The search box itself is shared
+    (`SearchInput`), so both look and behave the same.
+  - **The brief's suggested `PayeeOption`, `AccountCard`, `AmountField` and `ReviewSummary`:** each
+    would be used in only one place.
+  - **A general dialog or card:** there's one dialog, and the card is already a shared CSS class.
+- **Trade-off:** small repeats stay, e.g. both search filters trim and lowercase the query.
+- **Justification:** a file's name tells you where a helper lives, and the dashboard and dialog can't
+  disagree on money rules. Sharing for screens that don't exist yet adds props nobody uses, so I
+  extract when a second use appears, which keeps a small app easy to follow.
 
 #### CSS Modules on the brief's tokens
 
 - **Decision:** one `.module.css` per component, every value a `var(--token)`. `src/index.css` holds
   the global base (reset, focus ring, `.amount`, `.sr-only`, reduced motion).
-- **Trade-off:** more files and class names than utility classes (e.g. Tailwind).
+- **Trade-off:** more files and class names than utility classes (e.g. Tailwind), and no shared set
+  of classes to keep styles consistent as the app grows.
 - **Justification:** class names can't clash, and Vite supports CSS Modules with no setup. The tokens
-  are already CSS variables, so they're used as they are; Tailwind would need each token mapped into
-  its theme, a second list to keep in sync with `design-tokens.css`.
+  are already CSS variables, so they're used as they are. Tailwind would need each token mapped into
+  its theme, a second list to keep in sync with `design-tokens.css`, which this small app didn't
+  need. If it grew, I'd move to Tailwind with the tokens in its theme: utility classes make styles
+  easier to standardise and UI faster to build.
 
 #### Copy written inline
 
@@ -89,21 +90,29 @@ Form + Zod, the copy, the breakpoints) isn't repeated here.
 - **Trade-off:** a second language would mean collecting the strings first.
 - **Justification:** translations are out of scope (§2). Inline text can be checked against §4 by
   reading the component, and the tests type the §4 strings, so a typo can't hide behind a shared
-  constant. With a second language I'd add an i18n library and move strings into message files.
+  constant, and there's no extra layer to maintain for a single language. With a second language
+  I'd add an i18n library and move strings into message files.
   Money and date formatting already set their `en-SG` locale in one place (`lib/format.ts`).
 
 ### Server state vs UI state
 
-- **Server data** (customer, accounts, transactions, payees) lives only in TanStack Query. Values
-  derived from it (total available, remaining daily limit) are computed by `lib/money.ts` on render,
-  never stored.
-- **UI state** sits in the component that owns it, with `useState`: dialog open
-  (`DashboardContent`), current step and discard prompt (`TransferDialog`), search text
-  (`TransactionList`, `RecipientStep`). Form values live in React Hook Form.
-- **Preferences** (theme, segment) live in `usePreferences`, saved to `localStorage`.
+- **Decision:**
+  - **Server data** (customer, accounts, transactions, payees) lives only in TanStack Query. Derived
+    values (total available, remaining limit) are computed by `lib/money.ts` on render, never
+    stored.
+  - **UI state** stays in the component that owns it (`useState`): dialog open, current step,
+    discard prompt, search text. Form values live in React Hook Form.
+  - **Preferences** (theme, segment) live in `usePreferences`, saved to `localStorage`.
 
-No global store: the query cache is the only state shared widely, and preferences are passed down
-from `App` (see [Theming and layout](#theming-and-layout)).
+  Not chosen: a global store (Redux, Zustand, or a context).
+
+- **Trade-off:** if far-apart components needed the same UI state, I'd have to pass props through
+  more levels, or add a store then.
+- **Justification:** the query cache already shares server data across the app, and a store would
+  copy API data into a second place, which E2 warns against. Each piece of UI state has one owner,
+  and preferences pass through only one component to reach the toggles (see
+  [Theming and layout](#theming-and-layout)), so a store
+  would add a dependency and boilerplate without solving a problem.
 
 ### Server data
 
@@ -111,8 +120,8 @@ from `App` (see [Theming and layout](#theming-and-layout)).
 
 - **Decision:** `lib/money.ts` turns amounts into whole cents before adding or comparing them.
 - **Trade-off:** every money comparison has to go through `toCents`.
-- **Justification:** `4280.55 ≤ 4280.55` can't fail on floating-point rounding. A rounding slip would
-  wrongly block or allow a transfer.
+- **Justification:** in floating point, `5000 − 512.19` is `4487.8099999999995`, so sending exactly
+  the remaining `4487.81` would be wrongly blocked. In cents it's `448781 ≤ 448781`.
 
 #### One dashboard state (D1, D7)
 
@@ -138,8 +147,9 @@ from `App` (see [Theming and layout](#theming-and-layout)).
 
 - **Decision:** filter the loaded rows. Not chosen: the API's server search (`?q=`).
 - **Trade-off:** older transactions aren't searchable.
-- **Justification:** instant, with no extra requests, debounce or loading state. The list is labelled
-  "Recent transactions", so users don't expect full history. A full history page would use `?q=`.
+- **Justification:** instant, with no extra requests, debounce or loading state, so there's less to
+  build and less that can fail. The list is labelled "Recent transactions", so users don't expect
+  full history. A full history page would use `?q=`.
 
 #### Payees load when the dialog opens
 
@@ -147,8 +157,9 @@ from `App` (see [Theming and layout](#theming-and-layout)).
   empty states. Not chosen: prefetching them with the dashboard.
 - **Trade-off:** the first open shows skeleton rows for about half a second.
 - **Justification:** many visits only check balances, so a payee request on every load would often be
-  wasted, and a prefetch only helps within the 30s `staleTime` anyway. If the list grew large, it
-  would need server search or paging whichever component fetched it.
+  wasted, and a prefetch only helps within the starter's 30s `staleTime`, which I kept. Loading on
+  open keeps the dashboard's requests to what it shows. If the list grew large, it would need server
+  search or paging whichever component fetched it.
 
 ### Forms and validation
 
@@ -200,7 +211,8 @@ from `App` (see [Theming and layout](#theming-and-layout)).
   open and on each step change. Not chosen: a dialog library.
 - **Trade-off:** backdrop and animation styled by hand; jsdom needs a `showModal` stub in tests.
 - **Justification:** the browser provides the focus trap, Esc and backdrop, the parts most easily got
-  wrong by hand. Rendering only while open means every transfer starts with a fresh form.
+  wrong by hand, so the dialog is accessible without a dependency. Rendering only while open means
+  every transfer starts with a fresh form.
 
 #### `Discard this transfer?` panel (optional)
 
@@ -223,9 +235,9 @@ from `App` (see [Theming and layout](#theming-and-layout)).
 
 #### `usePreferences` is called once, in `App`, and passed down
 
-- **Decision:** one hook call, with props passed one level down. Not chosen: a call per switch, or a
-  context provider.
-- **Trade-off:** props threaded through one level.
+- **Decision:** one hook call, passed as a prop to `Header` and `Dashboard`, which hand it to the
+  toggles. Not chosen: a call per switch, or a context provider.
+- **Trade-off:** `Header` and `Dashboard` pass along a prop they don't use themselves.
 - **Justification:** two segment switches render (header from 640px, under the greeting on phones).
   Separate hook calls would hold separate state and could disagree after a resize.
 
@@ -244,18 +256,20 @@ from `App` (see [Theming and layout](#theming-and-layout)).
 - **Justification:** saving the OS value on first load would freeze it, so a user who never toggles
   would stop following their system.
 
-Account cards stack one per row below 1024px rather than scrolling sideways, so no balance is hidden.
+Account cards stack one per row below 640px rather than scrolling sideways, so no balance is hidden.
 
 ### Libraries, polish and tooling
 
 #### Libraries added
 
-- **Decision:** `lucide-react` for icons only; everything else is in the starter. Native elements
+- **Decision:** `lucide-react` for icons, plus Prettier as a dev tool; everything else is in the
+  starter. Native elements
   (dialog, radios, select). Not chosen: a headless library (Radix, React Aria) or a styled one (MUI).
 - **Trade-off:** their styling is written by hand.
 - **Justification:** native elements already provide the hard behaviour (focus trap, Esc, arrow keys
   between radios). A headless library would leave all the CSS; a styled one would need every token
-  mapped into its theme and its look overridden to match the wireframe.
+  mapped into its theme and its look overridden to match the wireframe, adding complexity this small
+  app doesn't need.
 
 #### Motion and icons
 
@@ -275,7 +289,8 @@ to `main`, so nothing failing reaches what Vercel deploys.
 
 The dashboard has one skeleton and one error (see [One dashboard state](#one-dashboard-state-d1-d7));
 the payee list in the dialog has its own. Empty and no-results states share `EmptyState`. On the
-deployed site, add these to the page URL; `lib/demoParams.ts` forwards them to the mock API:
+deployed site, each state below can be triggered with a URL param (`?delay`, `?scenario`, forwarded
+to the mock API by `lib/demoParams.ts`) or with the input shown:
 
 | State              | How to trigger                                                 | What you see                                                                                                                                                                                 |
 | ------------------ | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -304,10 +319,11 @@ starter's `format.test.ts`. They render the whole `<App />` against the real MSW
 | Send rejected with 422 (`server.use`: balance dropped to 100) → alert with the server message, still on review with 120, no `Transfer sent` → `Back` shows the error under Amount → lower to 100 → sent | T7, T8, §3.3 server errors |
 
 The 422 test exists because that path can't be reached by hand: the form blocks those amounts first.
-The mock rejects anything over 100, so the test only passes if lowering the amount is what makes the
+The override rejects anything over 100, so the test only passes if lowering the amount is what makes the
 retry work. Checked by hand instead: the 500 failure (`#fail` note), the validation edge cases
 (exact balance vs +0.01, daily limit, `0.99`, `1.234`), text/background contrast ≥ 4.5:1 in all four
-theme combinations, no sideways scroll at 360px, and tap targets ≥ 44px. Schema unit tests would
+theme combinations, no sideways scroll at 360px, and tap targets ≥ 44px at phone widths (the desktop
+nav links are 37px tall). Schema unit tests would
 mostly restate the rules, so I left them out.
 
 Money assertions use `money()` (`test/renderApp.tsx`): `formatMoney` with the non-breaking space
@@ -346,10 +362,11 @@ normalised the way Testing Library normalises page text.
 
 ### Known issues
 
-- **Idle app can't reach the mock API.** Leave the deployed app idle for a while and the payee list
-  fails to load in the dialog, and Retry doesn't help. The browser stops the idle MSW service worker;
-  on restart it has forgotten this page, so `/api` requests go to Vercel, which has no API. Reload to
-  fix. Sending a transfer would fail the same way.
+- **Idle app can't reach the mock API.** Leave the deployed app idle for a while and every API
+  request returns 404: the payee list fails to load in the dialog (Retry doesn't help), sending a
+  transfer fails, and the dashboard's background refreshes log 404s in the console while it keeps
+  showing the data it already has. The browser stops MSW's worker when it's idle; on restart it has
+  forgotten this page, so `/api` requests go to Vercel, which has no API. Reload to fix.
 - **Overscroll strip above the header.** With bounce scrolling (Safari, Chrome on macOS), pulling
   down past the top shows the page background (`--bg`) above the `--surface` header.
   `overscroll-behavior-y: none` would hide it but also turns off pull-to-refresh on mobile, so it's
