@@ -6,12 +6,9 @@
     gap: var(--space-3);
 }
 
-.title {
-    color: var(--text-muted);
-    font-size: var(--text-sm);
-    font-weight: var(--weight-semibold);
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+/* The title shares the row with the search, so it drops the section title's margin. */
+.header > h2 {
+    margin-bottom: 0;
 }
 
 .search {

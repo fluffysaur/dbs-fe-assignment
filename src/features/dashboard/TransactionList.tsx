@@ -37,7 +37,7 @@ export function TransactionList({ transactions }: Props) {
     return (
         <section className={dashboard.section} aria-labelledby="transactions-title">
             <div className={styles.header}>
-                <h2 id="transactions-title" className={styles.title}>
+                <h2 id="transactions-title" className={dashboard.sectionTitle}>
                     Recent transactions
                 </h2>
                 {transactions.length > 0 && (
