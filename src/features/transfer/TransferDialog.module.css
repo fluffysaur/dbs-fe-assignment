@@ -312,9 +312,11 @@
     color: var(--text);
 }
 
-/* Success and discard panels */
+/* Success and discard panels. Centred in the phone sheet so they don't sit at the top of an
+   empty screen; on desktop the dialog fits its content, so there's no space to centre in. */
 .success,
 .discard {
+    margin-block: auto;
     display: grid;
     justify-items: center;
     gap: var(--space-3);
