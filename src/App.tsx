@@ -1,4 +1,4 @@
-import { Header } from './components/Header'
+import { Header } from './features/header/Header'
 import { Dashboard } from './features/dashboard/Dashboard'
 import { usePreferences } from './features/theme/usePreferences'
 
