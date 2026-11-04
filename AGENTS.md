@@ -14,7 +14,7 @@ Rules that are easy to miss:
 - Each validation rule is defined once in a Zod schema and used for both inline errors and submit.
 - Money renders with `formatMoney`, dates with `formatShortDate` (`src/lib/format.ts`). Tests compare against `formatMoney(...)`, not typed strings.
 - Tests are the three E4 lists, plus the starter's `format.test.ts`. The author defends every test in an interview, so propose any new test to the user with the reason it can't be checked by hand, and add it only once they agree.
-- `mock-api/` and its data stay unchanged. Tests cover edge cases with `server.use(...)` overrides; `?scenario`, `?delay` and `#fail` hooks appear only in tests or an optional debug menu.
+- `mock-api/` and its data stay unchanged. Tests cover edge cases with `server.use(...)` overrides; `?scenario` and `?delay` reach the mock API only through `lib/demoParams.ts`, which forwards them from the page URL for reviewers and does nothing without them; `#fail` is typed into the note. Never add a permanent "break the app" control to the UI.
 - Build only what §2 lists as Required or Optional. `Cards`, `Payments` and `Insights` render as disabled links.
 
 ## Before committing

@@ -64,6 +64,12 @@ button:disabled {
     outline: none;
 }
 
+/* The browser's default placeholder grey fails AA on the dark surface (TH3). */
+::placeholder {
+    color: var(--text-muted);
+    opacity: 1; /* Firefox fades placeholders by default */
+}
+
 /* Money and account numbers. */
 .amount {
     font-variant-numeric: tabular-nums;
