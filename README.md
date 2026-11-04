@@ -323,15 +323,14 @@ Form + Zod, the copy, the breakpoints) isn't repeated here.
 1. Fix the idle mock-worker failure (see Known issues): detect it and re-register the worker, or ask
    the user to reload.
 2. An end-to-end test against the deployed site, which would have caught (1).
-3. Unit tests for the schema rules and a send-failure test.
-4. `Make another transfer` (wireframe, optional), with step 2 waiting for the refreshed balance and
+3. `Make another transfer` (wireframe, optional), with step 2 waiting for the refreshed balance and
    limit.
-5. Per-section loading and error states on the dashboard, and patching balance and limit from the
+4. Per-section loading and error states on the dashboard, and patching balance and limit from the
    POST response if the APIs prove slow.
-6. Find a fix for the overscroll strip above the header (see Known issues) that keeps
+5. Find a fix for the overscroll strip above the header (see Known issues) that keeps
    pull-to-refresh on mobile.
-7. Follow live OS theme changes until the user picks one.
-8. Server search for a full transaction history page.
+6. Follow live OS theme changes until the user picks one.
+7. Server search for a full transaction history page.
 
 ## Loading, empty and error states
 
@@ -352,19 +351,25 @@ On the deployed site, add these to the page URL. `lib/demoParams.ts` forwards th
 
 ## Tests
 
-`npm test` runs the three tests the brief asks for (E4), plus the starter's `format.test.ts`. They
-render the whole `<App />` against the real MSW handlers and use `user-event`, so they check what a
-user sees, not component internals. `npm run check` and `npm run build` both run in CI.
+`npm test` runs the three tests the brief asks for (E4), one send-failure test (T7), and the
+starter's `format.test.ts`. They render the whole `<App />` against the real MSW handlers and use
+`user-event`, so they check what a user sees, not component internals. `npm run check` and
+`npm run build` both run in CI.
 
-| Test                                                                                                                                                                                         | Covers             |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| Amount over balance → exact error, focus on the field, **no POST sent** (MSW request log)                                                                                                    | E4.1               |
-| Successful transfer → `Sending…` disabled, `Transfer sent` + reference → dashboard shows the new total, account balance, limit and `Transfer to Jamie Tan` row; focus back on `New transfer` | E4.2 (also T5, T6) |
-| Dashboard 500 (one-off `server.use`) → error → `Retry` → loaded                                                                                                                              | E4.3               |
+| Test                                                                                                                                                                                                    | Covers                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| Amount over balance → exact error, focus on the field, **no POST sent** (MSW request log)                                                                                                               | E4.1                       |
+| Successful transfer → `Sending…` disabled, `Transfer sent` + reference → dashboard shows the new total, account balance, limit and `Transfer to Jamie Tan` row; focus back on `New transfer`            | E4.2 (also T5, T6)         |
+| Dashboard 500 (one-off `server.use`) → error → `Retry` → loaded                                                                                                                                         | E4.3                       |
+| Send rejected with 422 (`server.use`: balance dropped to 100) → alert with the server message, still on review with 120, no `Transfer sent` → `Back` shows the error under Amount → lower to 100 → sent | T7, T8, §3.3 server errors |
 
-I kept to the three the brief asks for. Checked by hand in the browser instead: the edge cases
-(exact balance vs +0.01, send failure) with the demo hooks above; every text/background token pair
-at ≥ 4.5:1 in all four theme combinations; no sideways scroll at 360px and 390px; tap targets ≥ 44px.
+The 422 test mocks the server because that path can't be reached by hand: the form blocks those
+amounts first. The mock rejects anything over 100, so the test only passes if lowering the amount is
+what makes the retry work. Checked by hand in the browser instead: the 500 failure (`#fail` note)
+and the validation edge cases (exact balance vs +0.01, daily limit, `0.99`, `1.234`) with the demo
+hooks above. Schema unit tests would mostly restate the rules, so I left them out. Also by hand:
+every text/background token pair at ≥ 4.5:1 in all four theme combinations; no sideways scroll at
+360px and 390px; tap targets ≥ 44px.
 
 Test notes:
 
