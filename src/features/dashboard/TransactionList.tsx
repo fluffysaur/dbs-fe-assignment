@@ -18,10 +18,10 @@ interface Props {
  */
 export function TransactionList({ transactions }: Props) {
     const [search, setSearch] = useState('')
-    const searchInput = useRef<HTMLInputElement>(null)
+    const searchInputRef = useRef<HTMLInputElement>(null)
 
     const query = search.trim().toLowerCase()
-    const visible = query
+    const visibleTransactions = query
         ? transactions.filter(
               (txn) =>
                   txn.description.toLowerCase().includes(query) ||
@@ -31,7 +31,7 @@ export function TransactionList({ transactions }: Props) {
 
     function clearSearch() {
         setSearch('')
-        searchInput.current?.focus()
+        searchInputRef.current?.focus()
     }
 
     return (
@@ -42,7 +42,7 @@ export function TransactionList({ transactions }: Props) {
                 </h2>
                 {transactions.length > 0 && (
                     <SearchInput
-                        ref={searchInput}
+                        ref={searchInputRef}
                         id="transaction-search"
                         label="Search transactions"
                         value={search}
@@ -54,10 +54,11 @@ export function TransactionList({ transactions }: Props) {
 
             {/* Always rendered so screen readers hear the count change. */}
             <div aria-live="polite" className={styles.results}>
-                {query && visible.length > 0 && (
+                {query && visibleTransactions.length > 0 && (
                     <>
                         <span>
-                            {visible.length} {visible.length === 1 ? 'result' : 'results'}
+                            {visibleTransactions.length}{' '}
+                            {visibleTransactions.length === 1 ? 'result' : 'results'}
                         </span>
                         <Button variant="ghost" onClick={clearSearch}>
                             Clear search
@@ -68,7 +69,7 @@ export function TransactionList({ transactions }: Props) {
 
             {transactions.length === 0 ? (
                 <EmptyState icon={Receipt} message="No transactions yet." />
-            ) : visible.length === 0 ? (
+            ) : visibleTransactions.length === 0 ? (
                 <EmptyState
                     icon={SearchX}
                     message="No transactions match your search."
@@ -80,7 +81,7 @@ export function TransactionList({ transactions }: Props) {
                 />
             ) : (
                 <ul className={styles.list}>
-                    {visible.map((txn) => (
+                    {visibleTransactions.map((txn) => (
                         <li key={txn.id} className={styles.row}>
                             <div className={styles.details}>
                                 <p className={styles.description}>{txn.description}</p>

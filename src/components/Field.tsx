@@ -24,12 +24,12 @@ interface Props {
      * A function, not plain children, so Field can give the control its props
      * while the call site still places it (e.g. inside the SGD prefix).
      */
-    children: (control: ControlProps) => ReactNode
+    children: (controlProps: ControlProps) => ReactNode
 }
 
 export function Field({ id, label, error, describedBy, aside, footer, children }: Props) {
     const describedByIds = [error ? errorId(id) : null, describedBy].filter(Boolean)
-    const control: ControlProps = {
+    const controlProps: ControlProps = {
         id,
         className: styles.input,
         'aria-invalid': error ? true : undefined,
@@ -44,7 +44,7 @@ export function Field({ id, label, error, describedBy, aside, footer, children }
                 </label>
                 {aside}
             </div>
-            {children(control)}
+            {children(controlProps)}
             <InlineError id={errorId(id)} message={error} />
             {footer}
         </div>

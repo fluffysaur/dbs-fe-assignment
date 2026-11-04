@@ -30,15 +30,17 @@ export function RecipientStep() {
     // When the user picks "Send to someone new", scroll its fields into view:
     // with several payees they open below the fold. Only on the user's own
     // pick, not the automatic preselect or coming back to this step.
-    const fieldsRef = useRef<HTMLDivElement>(null)
-    const revealFields = useRef(false)
+    const newRecipientFieldsRef = useRef<HTMLDivElement>(null)
+    const shouldRevealNewRecipient = useRef(false)
     useEffect(() => {
-        if (payeeId !== NEW_RECIPIENT || !revealFields.current) return
-        revealFields.current = false
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        fieldsRef.current?.scrollIntoView({
+        if (payeeId !== NEW_RECIPIENT || !shouldRevealNewRecipient.current) return
+        shouldRevealNewRecipient.current = false
+        const prefersReducedMotion = window.matchMedia(
+            '(prefers-reduced-motion: reduce)',
+        ).matches
+        newRecipientFieldsRef.current?.scrollIntoView({
             block: 'nearest',
-            behavior: reduceMotion ? 'auto' : 'smooth',
+            behavior: prefersReducedMotion ? 'auto' : 'smooth',
         })
     }, [payeeId])
 
@@ -126,7 +128,7 @@ export function RecipientStep() {
                         value={NEW_RECIPIENT}
                         {...payeeField}
                         onChange={(event) => {
-                            revealFields.current = true
+                            shouldRevealNewRecipient.current = true
                             return payeeField.onChange(event)
                         }}
                     />
@@ -136,15 +138,15 @@ export function RecipientStep() {
             </fieldset>
 
             {payeeId === NEW_RECIPIENT && (
-                <div ref={fieldsRef} className={shared.fields}>
+                <div ref={newRecipientFieldsRef} className={shared.fields}>
                     <Field
                         id="recipient-name"
                         label="Recipient name"
                         error={recipientErrors?.name?.message}
                     >
-                        {(control) => (
+                        {(controlProps) => (
                             <input
-                                {...control}
+                                {...controlProps}
                                 autoComplete="off"
                                 {...register('recipient.name')}
                             />
@@ -155,10 +157,10 @@ export function RecipientStep() {
                         label="Account number (8 digits)"
                         error={recipientErrors?.accountNumber?.message}
                     >
-                        {(control) => (
+                        {(controlProps) => (
                             <input
-                                {...control}
-                                className={`amount ${control.className}`}
+                                {...controlProps}
+                                className={`amount ${controlProps.className}`}
                                 inputMode="numeric"
                                 autoComplete="off"
                                 {...register('recipient.accountNumber')}
@@ -170,8 +172,8 @@ export function RecipientStep() {
                         label="Bank"
                         error={recipientErrors?.bank?.message}
                     >
-                        {(control) => (
-                            <select {...control} {...register('recipient.bank')}>
+                        {(controlProps) => (
+                            <select {...controlProps} {...register('recipient.bank')}>
                                 <option value="">Choose a bank</option>
                                 {BANKS.map((bank) => (
                                     <option key={bank} value={bank}>

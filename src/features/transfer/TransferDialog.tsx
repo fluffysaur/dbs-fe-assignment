@@ -54,7 +54,7 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
     const dialogRef = useRef<HTMLDialogElement>(null)
     const headingRef = useRef<HTMLHeadingElement>(null)
     const [step, setStep] = useState<Step>('recipient')
-    const [confirmingDiscard, setConfirmingDiscard] = useState(false)
+    const [isConfirmingDiscard, setConfirmingDiscard] = useState(false)
     const transferMutation = useCreateTransfer()
 
     const deposits = depositAccounts(accounts)
@@ -88,8 +88,8 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
 
     // Move focus to the step's (or success) heading so screen readers announce it.
     useEffect(() => {
-        if (!confirmingDiscard) headingRef.current?.focus()
-    }, [step, transfer, confirmingDiscard])
+        if (!isConfirmingDiscard) headingRef.current?.focus()
+    }, [step, transfer, isConfirmingDiscard])
 
     /** ✕, Cancel and Esc all come here. The native `close` event calls onClose. */
     function requestClose() {
@@ -102,8 +102,10 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
     }
 
     async function goNext(current: 'recipient' | 'amount') {
-        const valid = await form.trigger(STEP_FIELDS[current], { shouldFocus: true })
-        if (!valid) return
+        const isStepValid = await form.trigger(STEP_FIELDS[current], {
+            shouldFocus: true,
+        })
+        if (!isStepValid) return
         setStep(current === 'recipient' ? 'amount' : 'review')
     }
 
@@ -169,7 +171,7 @@ export function TransferDialog({ accounts, customer, onClose }: Props) {
                     : ''}
             </p>
 
-            {confirmingDiscard ? (
+            {isConfirmingDiscard ? (
                 <DiscardPanel
                     onKeepEditing={() => setConfirmingDiscard(false)}
                     onDiscard={() => dialogRef.current?.close()}

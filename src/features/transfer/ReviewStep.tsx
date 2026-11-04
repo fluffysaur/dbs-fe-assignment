@@ -19,8 +19,10 @@ export function ReviewStep({ depositAccounts }: Props) {
     // Values can't change on this step, so a one-off read is enough.
     const values = getValues()
 
-    const account = depositAccounts.find((item) => item.id === values.fromAccountId)
-    const payee = payees?.find((item) => item.id === values.payeeId)
+    const fromAccount = depositAccounts.find(
+        (account) => account.id === values.fromAccountId,
+    )
+    const savedPayee = payees?.find((payee) => payee.id === values.payeeId)
     const recipient =
         values.payeeId === NEW_RECIPIENT
             ? {
@@ -28,7 +30,11 @@ export function ReviewStep({ depositAccounts }: Props) {
                   bank: values.recipient.bank,
                   masked: maskAccountNumber(values.recipient.accountNumber.trim()),
               }
-            : { name: payee?.name, bank: payee?.bank, masked: payee?.accountNumberMasked }
+            : {
+                  name: savedPayee?.name,
+                  bank: savedPayee?.bank,
+                  masked: savedPayee?.accountNumberMasked,
+              }
 
     const amountCents = toCents(values.amount.trim())
     const totalCents = amountCents + toCents(TRANSFER_FEE)
@@ -39,8 +45,8 @@ export function ReviewStep({ depositAccounts }: Props) {
                 <div>
                     <dt>From</dt>
                     <dd>
-                        {account?.name} ·{' '}
-                        <span className="amount">{account?.maskedNumber}</span>
+                        {fromAccount?.name} ·{' '}
+                        <span className="amount">{fromAccount?.maskedNumber}</span>
                     </dd>
                 </div>
                 <div>
