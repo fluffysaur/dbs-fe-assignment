@@ -315,6 +315,7 @@
 /* Success and discard panels */
 .success,
 .discard {
+    margin-block: auto;
     display: grid;
     justify-items: center;
     gap: var(--space-3);
