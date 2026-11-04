@@ -101,9 +101,10 @@ it's preselected because there are no saved payees, and not when coming `Back` t
 - **Layout kept.** I didn't move `Send to someone new` to the top. Saved payees stay first, as in the
   wireframe.
 
-**No arrival-time line on review.** The wireframe shows `i Usually arrives in minutes.` on the review
-step. The brief doesn't ask for it there (T4), and it fixes `The money should arrive within minutes.` for
-the success screen, so showing both would repeat the same message one screen apart. It's on success only.
+**Arrival line on review follows the wireframe.** The brief doesn't list it for T4, so I followed the
+wireframe's copy: `Usually arrives in minutes.` with an info icon under the summary. It repeats the
+success screen's `The money should arrive within minutes.`, which is fine: one sets expectations
+before sending, the other confirms after.
 
 **Theming (TH1–TH3).**
 

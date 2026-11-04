@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Info } from 'lucide-react'
 import { useFormContext } from 'react-hook-form'
 import { payeesQuery } from '../../api/queries'
 import type { Account } from '../../api/types'
@@ -32,37 +33,43 @@ export function ReviewStep({ depositAccounts }: Props) {
     const totalCents = amountCents + toCents(TRANSFER_FEE)
 
     return (
-        <dl className={styles.summary}>
-            <div>
-                <dt>From</dt>
-                <dd>
-                    {account?.name} ·{' '}
-                    <span className="amount">{account?.maskedNumber}</span>
-                </dd>
-            </div>
-            <div>
-                <dt>To</dt>
-                <dd>
-                    {recipient.name} · {recipient.bank} ·{' '}
-                    <span className="amount">{recipient.masked}</span>
-                </dd>
-            </div>
-            <div>
-                <dt>Amount</dt>
-                <dd className="amount">{formatMoney(amountCents / 100)}</dd>
-            </div>
-            <div>
-                <dt>Fee</dt>
-                <dd className="amount">{formatMoney(TRANSFER_FEE)}</dd>
-            </div>
-            <div>
-                <dt>Note</dt>
-                <dd>{values.note.trim() || '—'}</dd>
-            </div>
-            <div className={styles.total}>
-                <dt>Total</dt>
-                <dd className="amount">{formatMoney(totalCents / 100)}</dd>
-            </div>
-        </dl>
+        <>
+            <dl className={styles.summary}>
+                <div>
+                    <dt>From</dt>
+                    <dd>
+                        {account?.name} ·{' '}
+                        <span className="amount">{account?.maskedNumber}</span>
+                    </dd>
+                </div>
+                <div>
+                    <dt>To</dt>
+                    <dd>
+                        {recipient.name} · {recipient.bank} ·{' '}
+                        <span className="amount">{recipient.masked}</span>
+                    </dd>
+                </div>
+                <div>
+                    <dt>Amount</dt>
+                    <dd className="amount">{formatMoney(amountCents / 100)}</dd>
+                </div>
+                <div>
+                    <dt>Fee</dt>
+                    <dd className="amount">{formatMoney(TRANSFER_FEE)}</dd>
+                </div>
+                <div>
+                    <dt>Note</dt>
+                    <dd>{values.note.trim() || '—'}</dd>
+                </div>
+                <div className={styles.total}>
+                    <dt>Total</dt>
+                    <dd className="amount">{formatMoney(totalCents / 100)}</dd>
+                </div>
+            </dl>
+            <p className={`${styles.hint} ${styles.arrival}`}>
+                <Info aria-hidden size={16} />
+                Usually arrives in minutes.
+            </p>
+        </>
     )
 }
