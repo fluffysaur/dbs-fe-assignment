@@ -87,7 +87,7 @@ describe('transfer', () => {
         expect(screen.getByText('Transfer to Jamie Tan')).toBeInTheDocument()
     })
 
-    it('shows the server error when a send is rejected, stays on review, and never shows success', async () => {
+    it('keeps the transfer on review when the server rejects it, and sends once the amount is lowered', async () => {
         // The balance dropped to 100 after the form loaded, so the form allows
         // 120 but the server rejects it. The mock data can't produce this, so
         // the server is overridden. Amounts up to 100 go on to the mock API.
