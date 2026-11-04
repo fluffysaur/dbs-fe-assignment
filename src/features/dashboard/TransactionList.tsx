@@ -1,8 +1,9 @@
-import { Receipt, Search, SearchX } from 'lucide-react'
+import { Receipt, SearchX } from 'lucide-react'
 import { useRef, useState } from 'react'
 import type { Transaction } from '../../api/types'
 import { Button } from '../../components/Button'
 import { EmptyState } from '../../components/EmptyState'
+import { SearchInput } from '../../components/SearchInput'
 import { formatMoney, formatShortDate } from '../../lib/format'
 import dashboard from './Dashboard.module.css'
 import styles from './TransactionList.module.css'
@@ -40,21 +41,14 @@ export function TransactionList({ transactions }: Props) {
                     Recent transactions
                 </h2>
                 {transactions.length > 0 && (
-                    <div className={styles.search}>
-                        <label htmlFor="transaction-search" className="sr-only">
-                            Search transactions
-                        </label>
-                        <Search aria-hidden size={18} className={styles.searchIcon} />
-                        <input
-                            ref={searchInput}
-                            id="transaction-search"
-                            type="search"
-                            placeholder="Search transactions"
-                            autoComplete="off"
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                        />
-                    </div>
+                    <SearchInput
+                        ref={searchInput}
+                        id="transaction-search"
+                        label="Search transactions"
+                        value={search}
+                        onChange={setSearch}
+                        className={styles.search}
+                    />
                 )}
             </div>
 

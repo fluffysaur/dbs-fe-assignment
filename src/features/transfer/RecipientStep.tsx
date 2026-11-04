@@ -4,8 +4,9 @@ import { useEffect, useRef, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { payeesQuery } from '../../api/queries'
 import { Button } from '../../components/Button'
-import { errorId, Field, inputClassName } from '../../components/Field'
+import { errorId, Field } from '../../components/Field'
 import { InlineError } from '../../components/InlineError'
+import { SearchInput } from '../../components/SearchInput'
 import { Skeleton } from '../../components/Skeleton'
 import { BANKS, NEW_RECIPIENT, type TransferFormValues } from './schema'
 import styles from './TransferDialog.module.css'
@@ -59,20 +60,12 @@ export function RecipientStep() {
     return (
         <>
             {payees.data && payees.data.length > 0 && (
-                <div>
-                    <label htmlFor="payee-search" className="sr-only">
-                        Search payees
-                    </label>
-                    <input
-                        id="payee-search"
-                        type="search"
-                        className={inputClassName}
-                        placeholder="Search payees"
-                        autoComplete="off"
-                        value={search}
-                        onChange={(event) => setSearch(event.target.value)}
-                    />
-                </div>
+                <SearchInput
+                    id="payee-search"
+                    label="Search payees"
+                    value={search}
+                    onChange={setSearch}
+                />
             )}
 
             <InlineError id={errorId('payeeId')} message={payeeError} />

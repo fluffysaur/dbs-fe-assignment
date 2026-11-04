@@ -15,27 +15,8 @@
 }
 
 .search {
-    position: relative;
     flex: 1 1 220px;
     max-width: 320px;
-}
-
-.search input {
-    width: 100%;
-    min-height: var(--tap-target);
-    padding: 0 var(--space-3) 0 var(--space-10);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius-full);
-    background: var(--surface);
-}
-
-.searchIcon {
-    position: absolute;
-    top: 50%;
-    left: var(--space-4);
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    pointer-events: none;
 }
 
 .results {

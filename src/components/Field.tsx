@@ -2,8 +2,6 @@ import type { ReactNode } from 'react'
 import { InlineError } from './InlineError'
 import styles from './Field.module.css'
 
-export const inputClassName = styles.input
-
 /** Props Field gives its control, so label, error and help text stay linked. */
 export interface ControlProps {
     id: string
