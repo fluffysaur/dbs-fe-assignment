@@ -114,14 +114,16 @@ export function makeTransferSchema({ accounts, remainingLimit }: SchemaContext) 
                 }
 
                 // Same order as the server: balance first, then the daily limit.
-                const account = accounts.find((item) => item.id === values.fromAccountId)
-                if (account && AMOUNT_RE.test(values.amount)) {
+                const fromAccount = accounts.find(
+                    (account) => account.id === values.fromAccountId,
+                )
+                if (fromAccount && AMOUNT_RE.test(values.amount)) {
                     const cents = toCents(values.amount)
-                    if (cents > toCents(account.balance)) {
+                    if (cents > toCents(fromAccount.balance)) {
                         ctx.addIssue({
                             code: 'custom',
                             path: ['amount'],
-                            message: `Amount can't be more than your available balance (${formatMoney(account.balance)}).`,
+                            message: `Amount can't be more than your available balance (${formatMoney(fromAccount.balance)}).`,
                         })
                     } else if (cents > toCents(remainingLimit)) {
                         ctx.addIssue({

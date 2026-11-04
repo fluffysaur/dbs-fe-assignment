@@ -15,7 +15,7 @@ interface Props {
 
 export function DashboardContent({ customer, accounts, transactions }: Props) {
     const [isTransferOpen, setTransferOpen] = useState(false)
-    const newTransferButton = useRef<HTMLButtonElement>(null)
+    const newTransferButtonRef = useRef<HTMLButtonElement>(null)
 
     return (
         <div className={`${styles.layout} ${styles.fadeIn}`}>
@@ -23,7 +23,7 @@ export function DashboardContent({ customer, accounts, transactions }: Props) {
                 <BalanceHero
                     accounts={accounts}
                     onNewTransfer={() => setTransferOpen(true)}
-                    buttonRef={newTransferButton}
+                    buttonRef={newTransferButtonRef}
                 />
                 <AccountList accounts={accounts} />
                 <TransactionList transactions={transactions} />
@@ -38,7 +38,7 @@ export function DashboardContent({ customer, accounts, transactions }: Props) {
                     onClose={() => {
                         setTransferOpen(false)
                         // Focus goes back to the button that opened the dialog (T1).
-                        newTransferButton.current?.focus()
+                        newTransferButtonRef.current?.focus()
                     }}
                 />
             )}

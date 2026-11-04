@@ -24,7 +24,7 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
     } = useFormContext<TransferFormValues>()
     const fromAccountId = useWatch({ control, name: 'fromAccountId' })
     const note = useWatch({ control, name: 'note' })
-    const account = depositAccounts.find((item) => item.id === fromAccountId)
+    const fromAccount = depositAccounts.find((account) => account.id === fromAccountId)
 
     const amountError = errors.amount?.message
     const noteError = errors.note?.message
@@ -42,9 +42,9 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
                     </p>
                 }
             >
-                {(control) => (
+                {(controlProps) => (
                     <select
-                        {...control}
+                        {...controlProps}
                         {...register('fromAccountId', {
                             // The balance rule depends on the account, so re-check the amount.
                             onChange: () => {
@@ -53,9 +53,9 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
                             },
                         })}
                     >
-                        {depositAccounts.map((item) => (
-                            <option key={item.id} value={item.id}>
-                                {item.name} · {item.maskedNumber}
+                        {depositAccounts.map((account) => (
+                            <option key={account.id} value={account.id}>
+                                {account.name} · {account.maskedNumber}
                             </option>
                         ))}
                     </select>
@@ -98,7 +98,7 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
                             <div>
                                 <dt>Available</dt>
                                 <dd className="amount">
-                                    {account ? formatMoney(account.balance) : '—'}
+                                    {fromAccount ? formatMoney(fromAccount.balance) : '—'}
                                 </dd>
                             </div>
                             <div>
@@ -109,12 +109,12 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
                     </>
                 }
             >
-                {(control) => (
+                {(controlProps) => (
                     <div className={styles.amountInput}>
                         <span aria-hidden>SGD</span>
                         <input
-                            {...control}
-                            className={`amount ${control.className}`}
+                            {...controlProps}
+                            className={`amount ${controlProps.className}`}
                             inputMode="decimal"
                             autoComplete="off"
                             placeholder="0.00"
@@ -139,8 +139,8 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
                     </span>
                 }
             >
-                {(control) => (
-                    <input {...control} autoComplete="off" {...register('note')} />
+                {(controlProps) => (
+                    <input {...controlProps} autoComplete="off" {...register('note')} />
                 )}
             </Field>
         </div>
