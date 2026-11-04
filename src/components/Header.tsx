@@ -3,6 +3,7 @@ import { customerQuery } from '../api/queries'
 import { SegmentSwitch } from '../features/theme/SegmentSwitch'
 import { ThemeToggle } from '../features/theme/ThemeToggle'
 import type { Preferences } from '../features/theme/usePreferences'
+import { Avatar } from './Avatar'
 import { Skeleton } from './Skeleton'
 import styles from './Header.module.css'
 
@@ -49,14 +50,11 @@ export function Header({ preferences }: Props) {
                         onToggle={preferences.toggleTheme}
                     />
                     {customer ? (
-                        <span
-                            className={styles.avatar}
-                            role="img"
-                            aria-label={`${customer.firstName} ${customer.lastName}`}
-                        >
-                            {customer.firstName[0]}
-                            {customer.lastName[0]}
-                        </span>
+                        <Avatar
+                            initials={`${customer.firstName[0]}${customer.lastName[0]}`}
+                            label={`${customer.firstName} ${customer.lastName}`}
+                            tone="brand"
+                        />
                     ) : (
                         <Skeleton width={40} height={40} round />
                     )}

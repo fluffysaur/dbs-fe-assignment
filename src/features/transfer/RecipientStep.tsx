@@ -3,11 +3,13 @@ import { Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { payeesQuery } from '../../api/queries'
+import { Avatar } from '../../components/Avatar'
 import { Button } from '../../components/Button'
 import { errorId, Field } from '../../components/Field'
 import { InlineError } from '../../components/InlineError'
 import { SearchInput } from '../../components/SearchInput'
 import { Skeleton } from '../../components/Skeleton'
+import { SpotIcon } from '../../components/SpotIcon'
 import { BANKS, NEW_RECIPIENT, type TransferFormValues } from './schema'
 import styles from './TransferDialog.module.css'
 
@@ -107,9 +109,7 @@ export function RecipientStep() {
                 {visiblePayees.map((payee) => (
                     <label key={payee.id} className={styles.payee}>
                         <input type="radio" value={payee.id} {...payeeField} />
-                        <span className={styles.initials} aria-hidden>
-                            {payee.initials}
-                        </span>
+                        <Avatar initials={payee.initials} />
                         <span className={styles.payeeText}>
                             <span className={styles.payeeName}>{payee.name}</span>
                             <span className={`amount ${styles.payeeMeta}`}>
@@ -129,9 +129,7 @@ export function RecipientStep() {
                             return payeeField.onChange(event)
                         }}
                     />
-                    <span className={styles.initials} aria-hidden>
-                        <Plus size={18} />
-                    </span>
+                    <SpotIcon icon={Plus} size={40} />
                     <span className={styles.payeeName}>Send to someone new</span>
                 </label>
             </fieldset>
