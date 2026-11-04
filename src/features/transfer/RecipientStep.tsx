@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useFormContext, useWatch } from 'react-hook-form'
 import { payeesQuery } from '../../api/queries'
 import { Button } from '../../components/Button'
-import { errorId, Field, fieldProps, inputClassName } from '../../components/Field'
+import { errorId, Field, inputClassName } from '../../components/Field'
 import { InlineError } from '../../components/InlineError'
 import { Skeleton } from '../../components/Skeleton'
 import { BANKS, NEW_RECIPIENT, type TransferFormValues } from './schema'
@@ -150,52 +150,44 @@ export function RecipientStep() {
                         label="Recipient name"
                         error={recipientErrors?.name?.message}
                     >
-                        <input
-                            className={inputClassName}
-                            autoComplete="off"
-                            {...fieldProps(
-                                'recipient-name',
-                                recipientErrors?.name?.message,
-                            )}
-                            {...register('recipient.name')}
-                        />
+                        {(control) => (
+                            <input
+                                {...control}
+                                autoComplete="off"
+                                {...register('recipient.name')}
+                            />
+                        )}
                     </Field>
                     <Field
                         id="recipient-account"
                         label="Account number (8 digits)"
                         error={recipientErrors?.accountNumber?.message}
                     >
-                        <input
-                            className={`amount ${inputClassName}`}
-                            inputMode="numeric"
-                            autoComplete="off"
-                            {...fieldProps(
-                                'recipient-account',
-                                recipientErrors?.accountNumber?.message,
-                            )}
-                            {...register('recipient.accountNumber')}
-                        />
+                        {(control) => (
+                            <input
+                                {...control}
+                                className={`amount ${control.className}`}
+                                inputMode="numeric"
+                                autoComplete="off"
+                                {...register('recipient.accountNumber')}
+                            />
+                        )}
                     </Field>
                     <Field
                         id="recipient-bank"
                         label="Bank"
                         error={recipientErrors?.bank?.message}
                     >
-                        <select
-                            className={inputClassName}
-                            {...fieldProps(
-                                'recipient-bank',
-                                recipientErrors?.bank?.message,
-                            )}
-                            {...register('recipient.bank')}
-                        >
-                            <option value="">Choose a bank</option>
-                            {BANKS.map((bank) => (
-                                <option key={bank} value={bank}>
-                                    {bank}
-                                </option>
-                            ))}
-                        </select>
+                        {(control) => (
+                            <select {...control} {...register('recipient.bank')}>
+                                <option value="">Choose a bank</option>
+                                {BANKS.map((bank) => (
+                                    <option key={bank} value={bank}>
+                                        {bank}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </Field>
                 </div>
             )}

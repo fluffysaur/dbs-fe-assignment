@@ -1,6 +1,6 @@
 import { useFormContext, useWatch } from 'react-hook-form'
 import type { Account } from '../../api/types'
-import { Field, fieldProps, inputClassName } from '../../components/Field'
+import { Field } from '../../components/Field'
 import { formatMoney } from '../../lib/format'
 import { NOTE_MAX_LENGTH, type TransferFormValues } from './schema'
 import styles from './TransferDialog.module.css'
@@ -34,38 +34,38 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
                 id="fromAccountId"
                 label="From account"
                 error={errors.fromAccountId?.message}
+                describedBy="from-hint"
                 footer={
                     <p id="from-hint" className={styles.hint}>
                         Deposit accounts only
                     </p>
                 }
             >
-                <select
-                    className={inputClassName}
-                    {...fieldProps(
-                        'fromAccountId',
-                        errors.fromAccountId?.message,
-                        'from-hint',
-                    )}
-                    {...register('fromAccountId', {
-                        // The balance rule depends on the account, so re-check the amount.
-                        onChange: () => {
-                            if (getFieldState('amount').isTouched) void trigger('amount')
-                        },
-                    })}
-                >
-                    {depositAccounts.map((item) => (
-                        <option key={item.id} value={item.id}>
-                            {item.name} · {item.maskedNumber}
-                        </option>
-                    ))}
-                </select>
+                {(control) => (
+                    <select
+                        {...control}
+                        {...register('fromAccountId', {
+                            // The balance rule depends on the account, so re-check the amount.
+                            onChange: () => {
+                                if (getFieldState('amount').isTouched)
+                                    void trigger('amount')
+                            },
+                        })}
+                    >
+                        {depositAccounts.map((item) => (
+                            <option key={item.id} value={item.id}>
+                                {item.name} · {item.maskedNumber}
+                            </option>
+                        ))}
+                    </select>
+                )}
             </Field>
 
             <Field
                 id="amount"
                 label="Amount"
                 error={amountError}
+                describedBy="amount-help"
                 footer={
                     <>
                         <div
@@ -105,23 +105,26 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
                     </>
                 }
             >
-                <div className={styles.amountInput}>
-                    <span aria-hidden>SGD</span>
-                    <input
-                        className={`amount ${inputClassName}`}
-                        inputMode="decimal"
-                        autoComplete="off"
-                        placeholder="0.00"
-                        {...fieldProps('amount', amountError, 'amount-help')}
-                        {...register('amount')}
-                    />
-                </div>
+                {(control) => (
+                    <div className={styles.amountInput}>
+                        <span aria-hidden>SGD</span>
+                        <input
+                            {...control}
+                            className={`amount ${control.className}`}
+                            inputMode="decimal"
+                            autoComplete="off"
+                            placeholder="0.00"
+                            {...register('amount')}
+                        />
+                    </div>
+                )}
             </Field>
 
             <Field
                 id="note"
                 label="Note (optional)"
                 error={noteError}
+                describedBy="note-count"
                 aside={
                     <span
                         id="note-count"
@@ -132,12 +135,9 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
                     </span>
                 }
             >
-                <input
-                    className={inputClassName}
-                    autoComplete="off"
-                    {...fieldProps('note', noteError, 'note-count')}
-                    {...register('note')}
-                />
+                {(control) => (
+                    <input {...control} autoComplete="off" {...register('note')} />
+                )}
             </Field>
         </div>
     )
