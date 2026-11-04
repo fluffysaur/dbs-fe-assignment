@@ -1,0 +1,47 @@
+.amountInput {
+    position: relative;
+}
+
+.amountInput span {
+    position: absolute;
+    top: 50%;
+    left: var(--space-3);
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-weight: var(--weight-semibold);
+    pointer-events: none;
+}
+
+.amountInput input {
+    padding-left: 3.25rem;
+    font-size: var(--text-lg);
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+}
+
+.chip {
+    min-width: 64px;
+    min-height: var(--tap-target);
+    padding: 0 var(--space-4);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--weight-medium);
+}
+
+.chip:hover {
+    background: var(--brand-soft);
+}
+
+.limits {
+    display: grid;
+    gap: var(--space-1);
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-sm);
+}

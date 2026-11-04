@@ -1,4 +1,4 @@
-import styles from './TransferDialog.module.css'
+import styles from './Stepper.module.css'
 
 export type Step = 'recipient' | 'amount' | 'review'
 

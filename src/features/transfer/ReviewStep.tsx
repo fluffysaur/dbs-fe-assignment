@@ -6,7 +6,8 @@ import type { Account } from '../../api/types'
 import { formatMoney, maskAccountNumber } from '../../lib/format'
 import { toCents } from '../../lib/money'
 import { NEW_RECIPIENT, TRANSFER_FEE, type TransferFormValues } from './schema'
-import styles from './TransferDialog.module.css'
+import shared from './TransferDialog.module.css'
+import styles from './ReviewStep.module.css'
 
 interface Props {
     depositAccounts: Account[]
@@ -34,7 +35,7 @@ export function ReviewStep({ depositAccounts }: Props) {
 
     return (
         <>
-            <dl className={styles.summary}>
+            <dl className={`${shared.detailRows} ${styles.summary}`}>
                 <div>
                     <dt>From</dt>
                     <dd>
@@ -66,7 +67,7 @@ export function ReviewStep({ depositAccounts }: Props) {
                     <dd className="amount">{formatMoney(totalCents / 100)}</dd>
                 </div>
             </dl>
-            <p className={`${styles.hint} ${styles.arrival}`}>
+            <p className={`${shared.hint} ${styles.arrival}`}>
                 <Info aria-hidden size={16} />
                 Usually arrives in minutes.
             </p>

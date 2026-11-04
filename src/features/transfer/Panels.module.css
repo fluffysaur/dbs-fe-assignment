@@ -1,0 +1,62 @@
+/* Success and discard panels. */
+.panel {
+    margin-block: auto;
+    display: grid;
+    justify-items: center;
+    gap: var(--space-3);
+    padding: var(--space-10) var(--space-6);
+    text-align: center;
+}
+
+/* Stacked, both as wide as the wider label; full width on phones. */
+.successActions {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+@media (max-width: 639px) {
+    .successActions {
+        justify-self: stretch;
+    }
+}
+
+.successIcon {
+    animation: pop-in var(--duration-base) var(--ease-out);
+}
+
+.successAmount {
+    font-size: var(--text-3xl);
+    font-weight: var(--weight-bold);
+    letter-spacing: var(--tracking-tight);
+}
+
+.reference {
+    display: flex;
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.reference dt {
+    color: var(--text-muted);
+}
+
+.reference dd {
+    margin: 0;
+    font-weight: var(--weight-semibold);
+}
+
+.discardActions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+}
+
+@keyframes pop-in {
+    from {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+}

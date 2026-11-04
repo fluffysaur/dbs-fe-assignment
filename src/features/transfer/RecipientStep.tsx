@@ -11,7 +11,8 @@ import { SearchInput } from '../../components/SearchInput'
 import { Skeleton } from '../../components/Skeleton'
 import { SpotIcon } from '../../components/SpotIcon'
 import { BANKS, NEW_RECIPIENT, type TransferFormValues } from './schema'
-import styles from './TransferDialog.module.css'
+import shared from './TransferDialog.module.css'
+import styles from './RecipientStep.module.css'
 
 export function RecipientStep() {
     const {
@@ -135,7 +136,7 @@ export function RecipientStep() {
             </fieldset>
 
             {payeeId === NEW_RECIPIENT && (
-                <div ref={fieldsRef} className={styles.fields}>
+                <div ref={fieldsRef} className={shared.fields}>
                     <Field
                         id="recipient-name"
                         label="Recipient name"

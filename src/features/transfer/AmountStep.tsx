@@ -3,7 +3,8 @@ import type { Account } from '../../api/types'
 import { Field } from '../../components/Field'
 import { formatMoney } from '../../lib/format'
 import { NOTE_MAX_LENGTH, type TransferFormValues } from './schema'
-import styles from './TransferDialog.module.css'
+import shared from './TransferDialog.module.css'
+import styles from './AmountStep.module.css'
 
 const QUICK_AMOUNTS = [50, 100, 250, 500]
 
@@ -29,14 +30,14 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
     const noteError = errors.note?.message
 
     return (
-        <div className={styles.fields}>
+        <div className={shared.fields}>
             <Field
                 id="fromAccountId"
                 label="From account"
                 error={errors.fromAccountId?.message}
                 describedBy="from-hint"
                 footer={
-                    <p id="from-hint" className={styles.hint}>
+                    <p id="from-hint" className={shared.hint}>
                         Deposit accounts only
                     </p>
                 }
@@ -90,7 +91,10 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
                                 </button>
                             ))}
                         </div>
-                        <dl id="amount-help" className={styles.limits}>
+                        <dl
+                            id="amount-help"
+                            className={`${shared.detailRows} ${styles.limits}`}
+                        >
                             <div>
                                 <dt>Available</dt>
                                 <dd className="amount">
@@ -128,7 +132,7 @@ export function AmountStep({ depositAccounts, remainingLimit }: Props) {
                 aside={
                     <span
                         id="note-count"
-                        className={`amount ${styles.hint}`}
+                        className={`amount ${shared.hint}`}
                         data-over={note.length > NOTE_MAX_LENGTH || undefined}
                     >
                         {note.length}/{NOTE_MAX_LENGTH}
