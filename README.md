@@ -1,6 +1,6 @@
 # Meridian Banking — Tan Yi Jia
 
-- Deployed: [dbs-fe-assignment-tanyijia.vercel.app](https://dbs-fe-assignment-tanyijia.vercel.app/)
+- Deployed: [meridian-banking-yijia.vercel.app](https://meridian-banking-yijia.vercel.app/)
 - Run locally: `npm install && npm run dev`
 
 ## Project structure
